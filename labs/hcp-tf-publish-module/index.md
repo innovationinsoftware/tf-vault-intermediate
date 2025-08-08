@@ -27,42 +27,9 @@ Publishing modules to the HCP Terraform private registry allows teams to reuse, 
   cd terraform-aws-s3-bucket
   git init
   ```
-- Add the following files:
-  - `main.tf`:
-    ```hcl
-    resource "aws_s3_bucket" "this" {
-      bucket = var.bucket_name
-    }
-    ```
-  - `variables.tf`:
-    ```hcl
-    variable "bucket_name" {
-      description = "The name of the S3 bucket."
-      type        = string
-    }
-    ```
-  - `outputs.tf`:
-    ```hcl
-    output "bucket_arn" {
-      description = "The ARN of the S3 bucket."
-      value       = aws_s3_bucket.this.arn
-    }
-    ```
-  - `README.md`:
-    ```markdown
-    # terraform-aws-s3-bucket
-    
-    A simple Terraform module to create an AWS S3 bucket.
-    
-    ## Usage
-    
-    ```hcl
-    module "s3_bucket" {
-      source      = "<YOUR_ORG>/s3-bucket/aws"
-      bucket_name = "my-bucket"
-    }
-    ```
-    ```
+- Copy the provided files (`main.tf`, `variables.tf`, `outputs.tf`, `README.md`) from the `hcp-tf-publish-module` lab folder into your new repository directory.
+
+- Review the files and make any necessary adjustments (such as updating the README usage example with your organization name).
 
 ---
 
@@ -78,24 +45,21 @@ Publishing modules to the HCP Terraform private registry allows teams to reuse, 
 
 ---
 
-#### 3. Publish the Module to HCP Terraform
-
-- In the HCP Terraform UI, navigate to your organization’s **Registry** section.
-- Click **Publish** and select **Module**.
-- Choose your VCS provider and select the `terraform-aws-s3-bucket` repository.
-- Follow the prompts to configure publishing (tag or branch-based), specify the source directory if needed, and complete the module and provider names.
-
----
-
-#### 4. Release Module Versions
+#### 3. Create an initial tag version
 
 - Create and push a semantic version tag (e.g., `v1.0.0`) to your repository:
   ```sh
   git tag v1.0.0
   git push origin v1.0.0
   ```
-- The registry will automatically detect and import the new version.
-- Make a change (e.g., add a new output or variable), update the README, and push a new tag (e.g., `v1.1.0`).
+- Update the README, and push a new tag (e.g., `v1.1.0`).
+
+#### 4. Publish the Module to HCP Terraform
+
+- In the HCP Terraform UI, navigate to your organization’s **Registry** section.
+- Click **Publish** and select **Module**.
+- Choose your VCS provider and select the `terraform-aws-s3-bucket` repository.
+- Follow the prompts to configure publishing (tag-based), and select Publish Module.
 
 ---
 
@@ -105,7 +69,7 @@ Publishing modules to the HCP Terraform private registry allows teams to reuse, 
   ```hcl
   module "s3_bucket" {
     source  = "app.terraform.io/<YOUR_ORG>/s3-bucket/aws"
-    version = "1.1.0"
+    version = "1.0.0"
     bucket_name = "my-bucket"
   }
   ```
