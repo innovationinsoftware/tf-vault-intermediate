@@ -114,7 +114,7 @@ resource "aws_vpc" "test_vpc" {
 resource "aws_subnet" "test_subnet" {
   vpc_id            = aws_vpc.test_vpc.id
   cidr_block        = "10.0.1.0/24"
-  availability_zone = "us-west-1b"
+  availability_zone = "us-west-1a"
   
   tags = {
     Name = "test-subnet"
@@ -248,13 +248,52 @@ git push origin v1.0.0
    - `AWS_REGION` (set to your preferred region, e.g., `us-west-1`)
 4. Enable **Test on publish** to run tests automatically when you publish new versions
 
-### 15. Run Tests Remotely
+### 15. Trigger Tests with Code Changes
 
-You can also run tests remotely from the CLI:
+Instead of running tests from the CLI, you can trigger tests automatically by making changes to your repository:
+
+1. Make a small change to your `README.md` file (add a comment or update description)
+2. Commit and push the change:
 
 ```sh
-terraform test -cloud-run=app.terraform.io/YOUR_ORG/ec2-instance-tests/aws
+git add README.md
+git commit -m "Trigger integration tests"
+git push origin main
 ```
+
+**Expected Result: FAILURE** - The tests should fail with the following error:
+
+```
+Error: error creating EC2 Subnet: InvalidParameterValue: Value (us-west-1a) for parameter availabilityZone is invalid. Subnets can currently only be created in the following availability zones: us-west-1b, us-west-1c. status code: 400
+with aws_subnet.test_subnet
+on tests/setup/main.tf line 20, in resource "aws_subnet" "test_subnet":
+```
+
+### 16. Fix the Availability Zone Issue
+
+The test is failing because `us-west-1a` is not available in your AWS region. Fix this by updating the availability zone in `tests/setup/main.tf`:
+
+```hcl
+resource "aws_subnet" "test_subnet" {
+  vpc_id            = aws_vpc.test_vpc.id
+  cidr_block        = "10.0.1.0/24"
+  availability_zone = "us-west-1b"  # Changed from us-west-1a
+  
+  tags = {
+    Name = "test-subnet"
+  }
+}
+```
+
+3. Commit and push the fix:
+
+```sh
+git add tests/setup/main.tf
+git commit -m "Fix availability zone for subnet"
+git push origin main
+```
+
+**Expected Result: SUCCESS** - The tests should now pass with the correct availability zone.
 
 ## Expected Results
 
