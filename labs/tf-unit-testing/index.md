@@ -22,9 +22,52 @@ Your existing configuration includes:
 - **EC2 Instances**: Custom module creating web servers in private subnets
 - **Variables**: `instance_count` and `instance_type` for EC2 instances
 
+## Prepare Your Configuration for Testing
+
+### 1. Fix Provider Version Compatibility
+
+First, update your `main.tf` to pin the AWS provider to a compatible version that works with the VPC module:
+
+```hcl
+terraform {
+  <!-- cloud {
+    organization = "sudo-cloud-org"
+    workspaces {
+      name = "policy-dev-an"
+    }
+  } -->
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 3.76.0"
+    }
+  }
+}
+```
+
+### 2. Comment Out HCP Terraform Module
+
+Since you're running unit tests locally, you don't have access to the HCP Terraform private registry. Comment out the S3 bucket module call in your `main.tf`:
+
+```hcl
+# module "s3_bucket" {
+#   source  = "app.terraform.io/sudo-cloud-org/s3-bucket/aws"
+#   version = "1.0.0"
+#   bucket_name = "my-bucket"
+# }
+```
+
+### 3. Initialize Terraform
+
+Run terraform init to download the correct provider version:
+
+```sh
+terraform init -upgrade
+```
+
 ## Create Unit Tests for Your Configuration
 
-### 1. Create a Test Directory
+### 4. Create Test Directory
 
 In your `learn-terraform-variables` repository, create a new directory for tests:
 
@@ -33,7 +76,7 @@ mkdir tests
 cd tests
 ```
 
-### 2. Test EC2 Instance Module
+### 5. Test EC2 Instance Module
 
 Create a test file `ec2_instance_tests.tftest.hcl` to validate your custom EC2 instance module:
 
@@ -79,7 +122,7 @@ run "test_valid_instance_count" {
 1. From your `learn-terraform-variables` directory, run the tests:
 
 ```sh
-terraform test
+terraform test tests/
 ```
 
 **Expected Result: FAILURE** - You should see errors related to missing AWS credentials. This is expected because we haven't set up mocking yet.
@@ -96,7 +139,7 @@ mock_provider "aws" {}
 2. Run the tests again:
 
 ```sh
-terraform test
+terraform test tests/
 ```
 
 **Expected Result: FAILURE** - You should now see errors related to empty availability zones data. This is expected because the data source needs to be mocked.
@@ -118,7 +161,7 @@ override_data {
 3. Run the tests again:
 
 ```sh
-terraform test
+terraform test tests/
 ```
 
 This will execute all your test files and validate that your configuration logic works correctly for different input scenarios.
