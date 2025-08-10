@@ -74,7 +74,7 @@ module "ec2_instances" {
 ## Requirements
 
 - Terraform >= 1.0
-- AWS Provider >= 5.0
+- AWS Provider >= 3.76
 ```
 
 ## Create Integration Tests
@@ -96,7 +96,7 @@ terraform {
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = "~> 5.0"
+      version = "~> 3.76"
     }
   }
 }
@@ -114,7 +114,7 @@ resource "aws_vpc" "test_vpc" {
 resource "aws_subnet" "test_subnet" {
   vpc_id            = aws_vpc.test_vpc.id
   cidr_block        = "10.0.1.0/24"
-  availability_zone = "us-west-1a"
+  availability_zone = "us-west-1b"
   
   tags = {
     Name = "test-subnet"
@@ -173,17 +173,19 @@ run "test_ec2_instance_creation" {
   variables {
     instance_count = 2
     instance_type  = "t2.micro"
+    security_group_ids = [run.setup_infrastructure.security_group_id]
+    subnet_ids = [run.setup_infrastructure.subnet_id]
   }
   
   # Test that instances are created
   assert {
-    condition     = length(aws_instance.web[*].id) == 2
+    condition     = length(aws_instance.app[*].id) == 2
     error_message = "Should create exactly 2 EC2 instances"
   }
   
   # Test that instance IDs are valid
   assert {
-    condition     = alltrue([for id in aws_instance.web[*].id : can(regex("^i-", id))])
+    condition     = alltrue([for id in aws_instance.app[*].id : can(regex("^i-", id))])
     error_message = "All EC2 instances should have valid instance IDs"
   }
 }
@@ -194,11 +196,13 @@ run "test_instance_count_variable" {
   variables {
     instance_count = 3
     instance_type  = "t2.small"
+    security_group_ids = [run.setup_infrastructure.security_group_id]
+    subnet_ids = [run.setup_infrastructure.subnet_id]
   }
   
   # Test that variable changes affect instance count
   assert {
-    condition     = length(aws_instance.web[*].id) == 3
+    condition     = length(aws_instance.app[*].id) == 3
     error_message = "Should create exactly 3 EC2 instances when instance_count = 3"
   }
 }
@@ -206,14 +210,7 @@ run "test_instance_count_variable" {
 
 ## Publish to HCP Terraform
 
-### 11. Initialize and Test Locally
-
-```sh
-terraform init
-terraform test tests/
-```
-
-### 12. Commit and Push
+### 11. Commit and Push
 
 ```sh
 git add .
@@ -221,32 +218,37 @@ git commit -m "Initial commit with EC2 instance module and integration tests"
 git push origin main
 ```
 
-### 13. Create Version Tag
+### 12. Create Version Tag
 
 ```sh
 git tag v1.0.0
 git push origin v1.0.0
 ```
 
-### 14. Publish to HCP Terraform
+### 13. Publish to HCP Terraform
 
 1. Go to your HCP Terraform organization
 2. Navigate to **Registry** → **Modules**
 3. Click **Publish Module**
 4. Select your GitHub repository
-5. Choose **Tag-based** publishing
-6. Select the `v1.0.0` tag
+5. Choose **Branch-based** publishing
+6. Select the 'main' branch and the 1.0.0 version
+6. Select 'Enable Testing for Module'
 7. Click **Publish Module**
 
 ## Run Tests in HCP Terraform
 
-### 15. Configure Module Tests
+### 14. Configure Module Tests
 
-1. In your HCP Terraform module page, go to **Tests**
+1. In your HCP Terraform module page, go to **Testing**
 2. Click **Configure tests**
-3. Enable **Test on publish** to run tests automatically when you publish new versions
+3. Add the same AWS credentials you configured in the `hcp-tf-setup` lab:
+   - `AWS_ACCESS_KEY_ID` (sensitive)
+   - `AWS_SECRET_ACCESS_KEY` (sensitive)
+   - `AWS_REGION` (set to your preferred region, e.g., `us-west-1`)
+4. Enable **Test on publish** to run tests automatically when you publish new versions
 
-### 16. Run Tests Remotely
+### 15. Run Tests Remotely
 
 You can also run tests remotely from the CLI:
 
