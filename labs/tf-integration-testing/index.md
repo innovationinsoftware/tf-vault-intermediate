@@ -2,7 +2,7 @@
 
 ## Overview
 
-In this lab, you will create integration tests for your existing `learn-terraform-variables` Terraform configuration that will run in your HCP Terraform workspace. Unlike unit tests that validate configuration logic without creating infrastructure, integration tests create real AWS resources and validate their actual properties, ensuring your infrastructure behaves correctly in the cloud environment.
+In this lab, you will create a new repository for your EC2 instance module and set up integration testing in HCP Terraform. Following the [Terraform testing tutorial](https://developer.hashicorp.com/terraform/tutorials/configuration-language/test), you'll move your existing module to a new repository, publish it to the HCP Terraform private module registry, and run tests remotely in HCP Terraform.
 
 ## Prerequisites
 
@@ -10,457 +10,297 @@ This lab builds upon the previous labs. You should have completed:
 - `hcp-tf-setup` - HCP Terraform authentication and workspace setup
 - `hcp-tf-modify` - Infrastructure modification and VCS workflow setup
 - `hcp-tf-publish-module` - Module publishing and consumption
-- `tf-unit-testing` - Unit testing with `command = plan`
+- `tf-unit-testing` - Unit testing with local mocking
 
-You should be working in your forked `learn-terraform-variables` repository with VCS integration enabled in your HCP Terraform workspace.
+You should be familiar with:
+- HCP Terraform private module registry
+- GitHub repository management
+- Terraform module structure
 
-## Understanding Integration Testing in HCP Terraform
+## Create New Repository
 
-### How Integration Tests Work in HCP Terraform
+### 1. Create GitHub Repository
 
-Integration tests in HCP Terraform work differently from local testing:
+Navigate to GitHub and create a new repository named `terraform-aws-ec2-instance-tests`. The repository name must follow the format `terraform-<PROVIDER>-<NAME>` for HCP Terraform module registry compatibility.
 
-| Aspect | Local Testing | HCP Terraform Testing |
-|--------|---------------|----------------------|
-| **Execution Environment** | Your local machine | HCP Terraform cloud workspace |
-| **Trigger** | `terraform test` command | Git push to repository |
-| **Infrastructure** | Your local AWS account | HCP Terraform's AWS account |
-| **Cost** | You pay for resources | HCP Terraform pays for resources |
-| **Cleanup** | Automatic after test | Automatic after test |
-| **Logs** | Local terminal | HCP Terraform UI |
-
-### Integration Testing vs Unit Testing
-
-| Aspect | Unit Testing | Integration Testing |
-|--------|--------------|-------------------|
-| **Command** | `command = plan` | `command = apply` (default) |
-| **Infrastructure** | No resources created | Real AWS resources created |
-| **Speed** | Seconds | Minutes (10-15 minutes) |
-| **Cost** | Free | HCP Terraform covers costs |
-| **Validation** | Configuration logic | Actual resource properties |
-| **Use Case** | Fast feedback during development | Final validation before production |
-
-## Create Integration Tests for Your Infrastructure
-
-### 1. Create Integration Test Directory
-
-In your `learn-terraform-variables` repository, create a new directory for integration tests:
+### 2. Clone the Repository
 
 ```sh
-mkdir integration-tests
-cd integration-tests
+git clone https://github.com/YOUR_USERNAME/terraform-aws-ec2-instance-tests
+cd terraform-aws-ec2-instance-tests
 ```
 
-### 2. Test VPC Resource Creation
+## Move Module and Tests
 
-Create a test file `vpc_integration_tests.tftest.hcl` to validate actual VPC creation:
+### 3. Copy EC2 Instance Module Files
+
+Copy your existing EC2 instance module files from `learn-terraform-variables/modules/aws-instance` to the root of the new repository:
+
+```sh
+# Copy the module files to root directory
+cp ../learn-terraform-variables/modules/aws-instance/* ./
+```
+
+The module files (main.tf, variables.tf, outputs.tf) should be in the root directory of the repository, not in a subdirectory. This is the standard structure for modules published to the HCP Terraform registry.
+
+### 4. Update Module Files
+
+The module files you copied should already contain the necessary configuration. If needed, update them to ensure they work as a standalone module:
+
+- `main.tf` - Contains the EC2 instance resources
+- `variables.tf` - Contains the module variables
+- `outputs.tf` - Contains the module outputs
+
+### 5. Create README
+
+Create a `README.md` file:
+
+```markdown
+# terraform-aws-ec2-instance-tests
+
+A Terraform module for creating EC2 instances with integration tests.
+
+## Usage
 
 ```hcl
-# integration-tests/vpc_integration_tests.tftest.hcl
-
-variables {
+module "ec2_instances" {
+  source = "app.terraform.io/YOUR_ORG/ec2-instance-tests/aws"
+  
   instance_count = 2
   instance_type  = "t2.micro"
 }
+```
 
-run "test_vpc_creation" {
-  command = apply
-  
-  assert {
-    condition     = module.vpc.vpc_id != ""
-    error_message = "VPC should be created with a valid ID"
-  }
-  
-  assert {
-    condition     = can(regex("^vpc-", module.vpc.vpc_id))
-    error_message = "VPC ID should start with 'vpc-'"
-  }
-  
-  assert {
-    condition     = module.vpc.vpc_cidr_block == "10.0.0.0/16"
-    error_message = "VPC should have the correct CIDR block"
+## Requirements
+
+- Terraform >= 1.0
+- AWS Provider >= 5.0
+```
+
+## Create Integration Tests
+
+### 6. Create Test Directory Structure
+
+```sh
+mkdir -p tests/setup
+```
+
+### 7. Create Setup Helper Module
+
+Create `tests/setup/main.tf` to provide test infrastructure:
+
+```hcl
+# tests/setup/main.tf
+
+terraform {
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 5.0"
+    }
   }
 }
 
-run "test_subnet_creation" {
-  command = apply
+# Create a VPC for testing
+resource "aws_vpc" "test_vpc" {
+  cidr_block = "10.0.0.0/16"
   
-  assert {
-    condition     = length(module.vpc.private_subnets) == 2
-    error_message = "Should create exactly 2 private subnets"
-  }
-  
-  assert {
-    condition     = length(module.vpc.public_subnets) == 2
-    error_message = "Should create exactly 2 public subnets"
-  }
-  
-  # Test that subnets are actually created in AWS
-  assert {
-    condition     = alltrue([for subnet in module.vpc.private_subnets : can(regex("^subnet-", subnet))])
-    error_message = "All private subnets should have valid subnet IDs"
-  }
-  
-  assert {
-    condition     = alltrue([for subnet in module.vpc.public_subnets : can(regex("^subnet-", subnet))])
-    error_message = "All public subnets should have valid subnet IDs"
+  tags = {
+    Name = "test-vpc"
   }
 }
 
-run "test_nat_gateway_creation" {
-  command = apply
+# Create a subnet for testing
+resource "aws_subnet" "test_subnet" {
+  vpc_id            = aws_vpc.test_vpc.id
+  cidr_block        = "10.0.1.0/24"
+  availability_zone = "us-west-1a"
   
-  assert {
-    condition     = module.vpc.nat_gateway_ids != null
-    error_message = "NAT gateway should be created"
+  tags = {
+    Name = "test-subnet"
+  }
+}
+
+# Create a security group for testing
+resource "aws_security_group" "test_sg" {
+  name_prefix = "test-sg"
+  vpc_id      = aws_vpc.test_vpc.id
+  
+  ingress {
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
   }
   
-  assert {
-    condition     = length(module.vpc.nat_gateway_ids) == 2
-    error_message = "Should create NAT gateway for each availability zone"
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
   }
+}
+
+output "vpc_id" {
+  value = aws_vpc.test_vpc.id
+}
+
+output "subnet_id" {
+  value = aws_subnet.test_subnet.id
+}
+
+output "security_group_id" {
+  value = aws_security_group.test_sg.id
 }
 ```
 
-### 3. Test Security Group Creation
+### 8. Create Integration Test
 
-Create a test file `security_group_integration_tests.tftest.hcl` to validate security group creation:
-
-```hcl
-# integration-tests/security_group_integration_tests.tftest.hcl
-
-variables {
-  instance_count = 2
-  instance_type  = "t2.micro"
-}
-
-run "test_app_security_group_creation" {
-  command = apply
-  
-  assert {
-    condition     = module.app_security_group.this_security_group_id != ""
-    error_message = "App security group should be created with a valid ID"
-  }
-  
-  assert {
-    condition     = can(regex("^sg-", module.app_security_group.this_security_group_id))
-    error_message = "Security group ID should start with 'sg-'"
-  }
-  
-  assert {
-    condition     = module.app_security_group.vpc_id == module.vpc.vpc_id
-    error_message = "Security group should be created in the correct VPC"
-  }
-  
-  assert {
-    condition     = module.app_security_group.name == "web-sg-project-alpha-development"
-    error_message = "Security group should have the correct name"
-  }
-}
-
-run "test_lb_security_group_creation" {
-  command = apply
-  
-  assert {
-    condition     = module.lb_security_group.this_security_group_id != ""
-    error_message = "Load balancer security group should be created with a valid ID"
-  }
-  
-  assert {
-    condition     = can(regex("^sg-", module.lb_security_group.this_security_group_id))
-    error_message = "Load balancer security group ID should start with 'sg-'"
-  }
-  
-  assert {
-    condition     = module.lb_security_group.vpc_id == module.vpc.vpc_id
-    error_message = "Load balancer security group should be created in the correct VPC"
-  }
-}
-```
-
-### 4. Test EC2 Instance Creation
-
-Create a test file `ec2_integration_tests.tftest.hcl` to validate EC2 instance creation:
+Create `tests/integration.tftest.hcl`:
 
 ```hcl
-# integration-tests/ec2_integration_tests.tftest.hcl
+# tests/integration.tftest.hcl
 
-variables {
-  instance_count = 2
-  instance_type  = "t2.micro"
+run "setup_infrastructure" {
+  module {
+    source = "./tests/setup"
+  }
 }
 
 run "test_ec2_instance_creation" {
   command = apply
   
+  variables {
+    instance_count = 2
+    instance_type  = "t2.micro"
+  }
+  
+  # Test that instances are created
   assert {
-    condition     = length(module.ec2_instances.instance_ids) == 2
+    condition     = length(aws_instance.web[*].id) == 2
     error_message = "Should create exactly 2 EC2 instances"
   }
   
+  # Test that instance IDs are valid
   assert {
-    condition     = alltrue([for id in module.ec2_instances.instance_ids : can(regex("^i-", id))])
+    condition     = alltrue([for id in aws_instance.web[*].id : can(regex("^i-", id))])
     error_message = "All EC2 instances should have valid instance IDs"
   }
-  
-  assert {
-    condition     = alltrue([for id in module.ec2_instances.instance_ids : id != ""])
-    error_message = "All EC2 instance IDs should be non-empty"
-  }
 }
 
-run "test_ec2_instance_placement" {
+run "test_instance_count_variable" {
   command = apply
   
-  assert {
-    condition     = length(module.ec2_instances.subnet_ids) == 2
-    error_message = "EC2 instances should be distributed across 2 subnets"
+  variables {
+    instance_count = 3
+    instance_type  = "t2.small"
   }
   
+  # Test that variable changes affect instance count
   assert {
-    condition     = alltrue([for subnet in module.ec2_instances.subnet_ids : can(regex("^subnet-", subnet))])
-    error_message = "All EC2 instances should be in valid subnets"
-  }
-  
-  assert {
-    condition     = module.ec2_instances.security_group_ids[0] == module.app_security_group.this_security_group_id
-    error_message = "EC2 instances should use the app security group"
-  }
-}
-
-run "test_ec2_instance_tags" {
-  command = apply
-  
-  assert {
-    condition     = module.ec2_instances.tags.project == "project-alpha"
-    error_message = "EC2 instances should have project-alpha tag"
-  }
-  
-  assert {
-    condition     = module.ec2_instances.tags.environment == "development"
-    error_message = "EC2 instances should have development environment tag"
+    condition     = length(aws_instance.web[*].id) == 3
+    error_message = "Should create exactly 3 EC2 instances when instance_count = 3"
   }
 }
 ```
 
-### 5. Test Load Balancer Creation
+## Publish to HCP Terraform
 
-Create a test file `load_balancer_integration_tests.tftest.hcl` to validate load balancer creation:
-
-```hcl
-# integration-tests/load_balancer_integration_tests.tftest.hcl
-
-variables {
-  instance_count = 2
-  instance_type  = "t2.micro"
-}
-
-run "test_load_balancer_creation" {
-  command = apply
-  
-  assert {
-    condition     = module.elb_http.this_elb_id != ""
-    error_message = "Load balancer should be created with a valid ID"
-  }
-  
-  assert {
-    condition     = can(regex("^lb-", module.elb_http.this_elb_id))
-    error_message = "Load balancer ID should start with 'lb-'"
-  }
-  
-  assert {
-    condition     = module.elb_http.internal == false
-    error_message = "Load balancer should be external (internet-facing)"
-  }
-  
-  assert {
-    condition     = length(module.elb_http.subnets) == 2
-    error_message = "Load balancer should be in both public subnets"
-  }
-}
-
-run "test_load_balancer_instance_attachment" {
-  command = apply
-  
-  assert {
-    condition     = length(module.elb_http.instances) == 2
-    error_message = "Load balancer should have 2 instances attached"
-  }
-  
-  assert {
-    condition     = alltrue([for instance in module.elb_http.instances : can(regex("^i-", instance))])
-    error_message = "All attached instances should have valid instance IDs"
-  }
-  
-  # Verify instances are the same as created by our EC2 module
-  assert {
-    condition     = length(setintersection(module.elb_http.instances, module.ec2_instances.instance_ids)) == 2
-    error_message = "Load balancer should be attached to our EC2 instances"
-  }
-}
-
-run "test_load_balancer_health_check" {
-  command = apply
-  
-  assert {
-    condition     = module.elb_http.health_check[0].target == "HTTP:80/index.html"
-    error_message = "Health check should target HTTP:80/index.html"
-  }
-  
-  assert {
-    condition     = module.elb_http.health_check[0].interval == 10
-    error_message = "Health check interval should be 10 seconds"
-  }
-  
-  assert {
-    condition     = module.elb_http.health_check[0].healthy_threshold == 3
-    error_message = "Healthy threshold should be 3"
-  }
-  
-  assert {
-    condition     = module.elb_http.health_check[0].unhealthy_threshold == 10
-    error_message = "Unhealthy threshold should be 10"
-  }
-}
-```
-
-### 6. Test Infrastructure Connectivity
-
-Create a test file `connectivity_integration_tests.tftest.hcl` to validate resource relationships:
-
-```hcl
-# integration-tests/connectivity_integration_tests.tftest.hcl
-
-variables {
-  instance_count = 2
-  instance_type  = "t2.micro"
-}
-
-run "test_vpc_security_group_relationship" {
-  command = apply
-  
-  assert {
-    condition     = module.app_security_group.vpc_id == module.vpc.vpc_id
-    error_message = "App security group should be in the correct VPC"
-  }
-  
-  assert {
-    condition     = module.lb_security_group.vpc_id == module.vpc.vpc_id
-    error_message = "Load balancer security group should be in the correct VPC"
-  }
-}
-
-run "test_subnet_instance_relationship" {
-  command = apply
-  
-  # Verify instances are in private subnets
-  assert {
-    condition     = alltrue([for subnet in module.ec2_instances.subnet_ids : contains(module.vpc.private_subnets, subnet)])
-    error_message = "EC2 instances should be in private subnets"
-  }
-  
-  # Verify load balancer is in public subnets
-  assert {
-    condition     = alltrue([for subnet in module.elb_http.subnets : contains(module.vpc.public_subnets, subnet)])
-    error_message = "Load balancer should be in public subnets"
-  }
-}
-
-run "test_security_group_instance_relationship" {
-  command = apply
-  
-  assert {
-    condition     = module.ec2_instances.security_group_ids[0] == module.app_security_group.this_security_group_id
-    error_message = "EC2 instances should use the app security group"
-  }
-  
-  assert {
-    condition     = module.elb_http.security_groups[0] == module.lb_security_group.this_security_group_id
-    error_message = "Load balancer should use the load balancer security group"
-  }
-}
-```
-
-## Trigger Integration Tests in HCP Terraform
-
-### 1. Commit and Push Your Integration Tests
-
-Add your integration tests to your repository:
+### 11. Initialize and Test Locally
 
 ```sh
-git add integration-tests/
-git commit -m "Add integration tests for infrastructure validation"
+terraform init
+terraform test tests/
+```
+
+### 12. Commit and Push
+
+```sh
+git add .
+git commit -m "Initial commit with EC2 instance module and integration tests"
 git push origin main
 ```
 
-### 2. Monitor Test Execution in HCP Terraform
+### 13. Create Version Tag
 
-1. Go to your HCP Terraform workspace
-2. Navigate to the **Runs** page
-3. You should see a new run triggered by your git push
-4. Click on the run to view details
-5. The run will execute your integration tests and create real infrastructure
+```sh
+git tag v1.0.0
+git push origin v1.0.0
+```
 
-### 3. Review Test Results
+### 14. Publish to HCP Terraform
 
-In the HCP Terraform UI, you can:
-- View the plan output showing what resources will be created
-- See the apply output showing actual resource creation
-- Review test results and any failures
-- Monitor resource creation in real-time
+1. Go to your HCP Terraform organization
+2. Navigate to **Registry** → **Modules**
+3. Click **Publish Module**
+4. Select your GitHub repository
+5. Choose **Tag-based** publishing
+6. Select the `v1.0.0` tag
+7. Click **Publish Module**
+
+## Run Tests in HCP Terraform
+
+### 15. Configure Module Tests
+
+1. In your HCP Terraform module page, go to **Tests**
+2. Click **Configure tests**
+3. Enable **Test on publish** to run tests automatically when you publish new versions
+
+### 16. Run Tests Remotely
+
+You can also run tests remotely from the CLI:
+
+```sh
+terraform test -cloud-run=app.terraform.io/YOUR_ORG/ec2-instance-tests/aws
+```
 
 ## Expected Results
 
-- Integration tests run in your HCP Terraform workspace
-- Real AWS resources are created and validated
-- Tests validate actual infrastructure properties and relationships
-- Resources are automatically destroyed after testing
-- All test results are visible in the HCP Terraform UI
+- Module is successfully published to HCP Terraform private registry
+- Integration tests run in HCP Terraform environment
+- Tests validate actual EC2 instance creation
+- Tests verify variable changes affect infrastructure
+- All tests pass, confirming module functionality
 
 ## Benefits of HCP Terraform Integration Testing
 
-### 1. **No Local AWS Costs**
-- HCP Terraform covers the cost of test resources
-- No need to configure local AWS credentials for testing
-- No risk of orphaned resources in your personal AWS account
+### 1. **Real Infrastructure Validation**
+- Tests create actual AWS resources
+- Validates real provider behavior
+- Tests actual resource properties and relationships
 
-### 2. **Consistent Environment**
-- Tests run in the same environment as your production infrastructure
-- No differences between local and cloud environments
-- Consistent AWS provider versions and configurations
+### 2. **Secure Testing Environment**
+- HCP Terraform manages credentials
+- No local AWS credentials needed
+- Centralized security management
 
-### 3. **Team Collaboration**
-- Test results are visible to your team in HCP Terraform
-- Integration tests can be part of your CI/CD pipeline
-- Test history is preserved and auditable
+### 3. **Automated Workflow**
+- Tests run automatically on module publish
+- Integration with VCS workflow
+- Consistent testing environment
 
-### 4. **Automated Workflow**
-- Tests trigger automatically on git pushes
-- No manual test execution required
-- Integration with your existing VCS workflow
+### 4. **Team Collaboration**
+- Test results visible to team
+- Test history preserved
+- Integration with CI/CD pipelines
 
-## Reflection & Challenge
+## Reflection
 
-- **Reflection:** How does running integration tests in HCP Terraform improve the testing experience compared to local testing? What are the trade-offs?
-- **Challenge:**
-  - Create a test that validates the web server is actually serving content (you may need to use data sources)
-  - Test load balancer health check behavior by creating instances that fail health checks
-  - Add tests for different instance types and verify they work correctly
-  - Test the NAT gateway functionality by verifying instances can access the internet
+- **Reflection:** How does running integration tests in HCP Terraform improve the testing experience compared to local unit tests? What are the trade-offs between testing speed, cost, and coverage?
 
 ## Key Concepts Covered
 
-- **HCP Terraform Integration Testing:** Running tests in the cloud workspace
-- **VCS-Driven Testing:** Triggering tests through git pushes
-- **Real Infrastructure Validation:** Testing actual resource properties and relationships
-- **Automated Test Execution:** Integration with existing VCS workflow
-- **Cost-Free Testing:** HCP Terraform covers test resource costs
+- **Module Repository Structure:** Creating standalone module repositories
+- **HCP Terraform Module Registry:** Publishing and versioning modules
+- **Integration Testing:** Testing with real infrastructure creation
+- **Helper Modules:** Using setup modules for test infrastructure
+- **Remote Testing:** Running tests in HCP Terraform environment
 
 ## Next Steps
 
-After completing this lab, you'll have a comprehensive testing strategy:
-- **Unit tests** for fast configuration validation during development
-- **Integration tests** for final validation of real infrastructure behavior
-- **HCP Terraform integration** for automated, cost-free testing
-
-This approach ensures your infrastructure is reliable while leveraging the benefits of HCP Terraform's cloud-based testing environment. 
+After completing this lab, you can:
+- Add more complex test scenarios
+- Test different instance types and configurations
+- Add validation for security groups and networking
+- Integrate with CI/CD pipelines for automated testing
+- Create additional helper modules for different test scenarios
