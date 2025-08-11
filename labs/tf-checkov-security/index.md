@@ -21,7 +21,6 @@ You should be familiar with:
 - Python 3.8+ installed and added to PATH
 - Git for Windows (for pre-commit hooks)
 - PowerShell or Command Prompt
-- Optional: Chocolatey or Scoop package managers
 
 ## Install Python and Checkov
 
@@ -385,6 +384,34 @@ checkov --config-file .\.checkov.yaml --output junitxml --output-file-path check
 # SARIF format for GitHub integration
 checkov --config-file .\.checkov.yaml --output sarif --output-file-path checkov-report.sarif
 ```
+
+### 20. Clean Up Generated Reports
+
+After testing the different output formats, clean up the generated report files:
+
+```sh
+# Remove generated report files
+Remove-Item checkov-report.json -ErrorAction SilentlyContinue
+Remove-Item checkov-report.xml -ErrorAction SilentlyContinue
+Remove-Item checkov-report.sarif -ErrorAction SilentlyContinue
+```
+
+### 21. Commit and Push Checkov Configuration
+
+Add your Checkov configuration to version control:
+
+```sh
+# Add the Checkov configuration file
+git add .
+
+# Commit the configuration
+git commit -m "Add Checkov security scanning configuration"
+
+# Push to remote repository
+git push
+```
+
+This ensures your security scanning configuration is saved and shared with your team.
 
 ## Expected Results
 
