@@ -246,8 +246,7 @@ git push origin v1.0.0
    - `AWS_ACCESS_KEY_ID` (sensitive)
    - `AWS_SECRET_ACCESS_KEY` (sensitive)
    - `AWS_REGION` (set to your preferred region, e.g., `us-west-1`)
-4. Enable **Test on publish** to run tests automatically when you publish new versions
-
+   
 ### 15. Trigger Tests with Code Changes
 
 Instead of running tests from the CLI, you can trigger tests automatically by making changes to your repository:
