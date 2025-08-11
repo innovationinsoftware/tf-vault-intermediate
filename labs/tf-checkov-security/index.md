@@ -23,9 +23,26 @@ You should be familiar with:
 - PowerShell or Command Prompt
 - Optional: Chocolatey or Scoop package managers
 
-## Install Checkov
+## Install Python and Checkov
 
-### 1. Install Checkov
+### 1. Install Python (if not already installed)
+
+If Python is not installed on your Windows system:
+
+1. Open an elevated PowerShell (Run as Administrator)
+2. Type `python` and press Enter
+3. This will open the Microsoft Store
+4. Click "Install" to install Python from the Microsoft Store
+5. After installation, close and reopen PowerShell
+
+Verify Python installation:
+
+```powershell
+python --version
+pip --version
+```
+
+### 2. Install Checkov
 
 Install Checkov using pip:
 
@@ -33,29 +50,39 @@ Install Checkov using pip:
 pip install checkov
 ```
 
-Alternatively, you can install using Chocolatey (Windows):
-
-```sh
-choco install checkov
-```
-
-Or using Scoop (Windows):
-
-```sh
-scoop install checkov
-```
-
-### 2. Verify Installation
+### 3. Verify Checkov Installation
 
 Verify that Checkov is installed correctly:
 
-```sh
-checkov --version
+**1: Add Python Scripts to PATH**
+
+Add the Python Scripts directory to your PATH environment variable:
+
+1. Open System Properties (Win + R, type `sysdm.cpl`)
+2. Click Advanced > "Environment Variables"
+3. Under "User variables", find "Path" and click "Edit"
+4. Click "New" and add: `C:\Users\Admin\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\Scripts`
+5. Click "OK" on all dialogs
+6. Close and reopen PowerShell
+
+**2: Associate Python with .py files**
+1. Open Command Prompt as Administrator (not PowerShell)
+2. Run the following commands to fix Python file associations:
+
+```cmd
+assoc .py=Python.File
+ftype Python.File="C:\Users\Admin\AppData\Local\Microsoft\WindowsApps\python.exe" "%1" %*
+```
+
+3. Then try running Checkov again:
+
+```powershell
+.\checkov --version
 ```
 
 ## Scan Your Terraform Configuration
 
-### 3. Navigate to Your Repository
+### 4. Navigate to Your Repository
 
 ```sh
 cd learn-terraform-variables
@@ -69,7 +96,7 @@ cd .\learn-terraform-variables
 cd ./learn-terraform-variables
 ```
 
-### 4. Run Initial Security Scan
+### 5. Run Initial Security Scan
 
 Run Checkov on your Terraform configuration:
 
@@ -79,7 +106,7 @@ checkov -d .
 
 **Expected Result:** Checkov will scan all Terraform files in the directory and report any security issues found.
 
-### 5. Analyze the Results
+### 6. Analyze the Results
 
 Checkov will output results in the following format:
 
