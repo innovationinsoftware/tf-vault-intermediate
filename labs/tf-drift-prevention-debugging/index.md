@@ -291,30 +291,7 @@ git commit -m "Add variable validations to prevent invalid configurations"
 git push
 ```
 
-### 16. Create New Module Version
-
-Now we need to create a new version tag for the module since we've added breaking changes (validation rules):
-
-```sh
-# Create a new version tag
-git tag v1.1.0
-git push origin v1.1.0
-```
-
-This will automatically publish the new version to the HCP Terraform module registry.
-
-### 17. Publish New Version in HCP Terraform UI
-
-1. Go to HCP Terraform module registry
-2. Navigate to your `ec2-instance-tests` module
-3. Click "Publish new version"
-4. Select the latest commit (the one with "Add variable validations to prevent invalid configurations")
-5. Type "1.1.0" as the version number
-6. Click "Publish version"
-
-This ensures the new version with validation rules is available in the module registry.
-
-### 18. Fix Existing Integration Tests
+### 16. Fix Existing Integration Tests
 
 **Important:** Adding validation rules to the module variables will cause **all existing integration tests to fail** because they don't have the correct tags and instance types.
 
@@ -339,7 +316,28 @@ git commit -m "Fix integration tests to comply with new variable validations"
 git push
 ```
 
+### 17. Create New Module Version
 
+Now we need to create a new version tag for the module since we've added breaking changes (validation rules):
+
+```sh
+# Create a new version tag
+git tag v1.1.0
+git push origin v1.1.0
+```
+
+This will automatically publish the new version to the HCP Terraform module registry.
+
+### 18. Publish New Version in HCP Terraform UI
+
+1. Go to HCP Terraform module registry
+2. Navigate to your `ec2-instance-tests` module
+3. Click "Publish new version"
+4. Select the latest commit (the one with "Add variable validations to prevent invalid configurations")
+5. Type "1.1.0" as the version number
+6. Click "Publish version"
+
+This ensures the new version with validation rules is available in the module registry.
 
 ### 19. Test Variable Validations in Consuming Repository
 
