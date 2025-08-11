@@ -80,20 +80,16 @@ ftype Python.File="C:\Users\Admin\AppData\Local\Microsoft\WindowsApps\python.exe
 .\checkov --version
 ```
 
+**Note for VS Code Users:** If Checkov works in a regular PowerShell window but not in VS Code's integrated terminal:
+
+1. **Restart VS Code** completely (close and reopen)
+
 ## Scan Your Terraform Configuration
 
-### 4. Navigate to Your Repository
+### 4. Navigate to Your Module Repository
 
 ```sh
-cd learn-terraform-variables
-```
-
-**Note for Windows Users:** If you're using PowerShell, you may need to use backslashes or forward slashes:
-
-```powershell
-cd .\learn-terraform-variables
-# or
-cd ./learn-terraform-variables
+cd terraform-aws-ec2-instance-tests
 ```
 
 ### 5. Run Initial Security Scan
@@ -101,8 +97,10 @@ cd ./learn-terraform-variables
 Run Checkov on your Terraform configuration:
 
 ```sh
-checkov -d .
+checkov -d .\
 ```
+
+**Note:** The `-d` flag requires a directory path. Use `.` for the current directory, or specify a full path like `checkov -d /path/to/terraform/files`.
 
 **Expected Result:** Checkov will scan all Terraform files in the directory and report any security issues found.
 
@@ -121,17 +119,7 @@ by bridgecrew.io | version: 2.3.xxx
 
 terraform scan results:
 
-Passed checks: 0, Failed checks: 3, Skipped checks: 0
-
-Check: CKV_AWS_18: "Ensure the S3 bucket has access logging enabled"
-	FAILED for resource: aws_s3_bucket.this
-	File: /main.tf:1-5
-	Guide: https://docs.bridgecrew.io/docs/s3_13-enable-logging
-
-Check: CKV_AWS_21: "Ensure all data stored in the S3 bucket have versioning enabled"
-	FAILED for resource: aws_s3_bucket.this
-	File: /main.tf:1-5
-	Guide: https://docs.bridgecrew.io/docs/s3_16-enable-versioning
+Passed checks: 7, Failed checks: 11, Skipped checks: 0
 ```
 
 ## Configure Checkov
@@ -148,7 +136,7 @@ This will create a configuration file with your current settings.
 
 ### 7. Customize Configuration
 
-Edit the `.checkov.yaml` file to customize your scanning:
+Edit the `.checkov.yaml` file to customize your scanning. Add the following lines to the existing config:
 
 ```yaml
 directory:
@@ -158,51 +146,53 @@ framework:
 output: cli
 quiet: false
 soft-fail: false
-skip-check:
-  - CKV_AWS_18  # Skip S3 logging check for now
+skip-path:
+  - .\tests  # Skip tests directory
+```
+
+### 8. Re-run Checkov with Configuration
+
+Run Checkov using your custom configuration file:
+
+```sh
+checkov --config-file .\.checkov.yaml
+```
+
+**Expected Result:** You should see fewer failures due to the skipped checks:
+
+```
+Passed checks: 3, Failed checks: 5, Skipped checks: 0
 ```
 
 ## Address Security Issues
 
-### 8. Fix S3 Bucket Security Issues
+### 9. Fix EC2 Instance Security Issues
 
 Update your `main.tf` to address the security issues found by Checkov:
 
 ```hcl
-# Add versioning to S3 bucket
-resource "aws_s3_bucket" "this" {
-  bucket = var.bucket_name
-}
+resource "aws_instance" "app" {
+  count = var.instance_count
 
-resource "aws_s3_bucket_versioning" "this" {
-  bucket = aws_s3_bucket.this.id
-  versioning_configuration {
-    status = "Enabled"
-  }
-}
+  ami           = data.aws_ami.amazon_linux.id
+  instance_type = var.instance_type
 
-# Add logging configuration
-resource "aws_s3_bucket_logging" "this" {
-  bucket = aws_s3_bucket.this.id
+  subnet_id              = var.subnet_ids[count.index % length(var.subnet_ids)]
+  vpc_security_group_ids = var.security_group_ids
 
-  target_bucket = aws_s3_bucket.logs.id
-  target_prefix = "log/"
-}
+  # Add EBS optimization for better performance and security
+  ebs_optimized = true
 
-resource "aws_s3_bucket" "logs" {
-  bucket = "${var.bucket_name}-logs"
-}
-```
+  user_data = <<-EOF
+    #!/bin/bash
+    sudo yum update -y
+    sudo yum install httpd -y
+    sudo systemctl enable httpd
+    sudo systemctl start httpd
+    echo "<html><body><div>Hello, world!</div></body></html>" > /var/www/html/index.html
+    EOF
 
-### 9. Add Required Variables
-
-Update your `variables.tf` to include the new bucket name variable:
-
-```hcl
-variable "bucket_name" {
-  description = "The name of the S3 bucket"
-  type        = string
-  default     = "my-terraform-bucket"
+  tags = var.tags
 }
 ```
 
@@ -211,33 +201,172 @@ variable "bucket_name" {
 After making the changes, run Checkov again:
 
 ```sh
-checkov -d .
+checkov --config-file .\.checkov.yaml
 ```
 
-**Expected Result:** Fewer security issues should be reported, and the S3 bucket should now pass the versioning and logging checks.
+**Expected Result:** The EC2 instance should now pass the EBS optimization check, reducing the number of failed checks.
 
-## Advanced Checkov Features
+### 11. Fix Instance Metadata Service Issue
 
-### 11. Skip Specific Checks
-
-You can skip specific checks using inline comments in your Terraform files:
+Update your `main.tf` to address the IMDSv1 security issue:
 
 ```hcl
-resource "aws_s3_bucket" "this" {
-  bucket = var.bucket_name
-  #checkov:skip=CKV_AWS_18:This bucket doesn't need logging for this use case
+resource "aws_instance" "app" {
+  count = var.instance_count
+
+  ami           = data.aws_ami.amazon_linux.id
+  instance_type = var.instance_type
+  ebs_optimized = true
+
+  subnet_id              = var.subnet_ids[count.index % length(var.subnet_ids)]
+  vpc_security_group_ids = var.security_group_ids
+
+  # Disable IMDSv1 and enable IMDSv2 for better security
+  metadata_options {
+    http_endpoint = "enabled"
+    http_tokens   = "required"
+  }
+
+  user_data = <<-EOF
+    #!/bin/bash
+    sudo yum update -y
+    sudo yum install httpd -y
+    sudo systemctl enable httpd
+    sudo systemctl start httpd
+    echo "<html><body><div>Hello, world!</div></body></html>" > /var/www/html/index.html
+    EOF
+
+  tags = var.tags
 }
 ```
 
-### 12. Generate Detailed Reports
+### 12. Re-run Security Scan Again
+
+After making the IMDS changes, run Checkov again:
+
+```sh
+checkov --config-file .\.checkov.yaml
+```
+
+**Expected Result:** The EC2 instance should now pass both the EBS optimization and IMDSv2 checks, further reducing the number of failed checks.
+
+### 13. Fix IAM Role Issue
+
+Update your `main.tf` to address the IAM role security issue:
+
+```hcl
+# Create IAM role for EC2 instance
+resource "aws_iam_role" "ec2_role" {
+  name = "ec2-instance-role"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = "sts:AssumeRole"
+        Effect = "Allow"
+        Principal = {
+          Service = "ec2.amazonaws.com"
+        }
+      }
+    ]
+  })
+}
+
+# Create IAM instance profile
+resource "aws_iam_instance_profile" "ec2_profile" {
+  name = "ec2-instance-profile"
+  role = aws_iam_role.ec2_role.name
+}
+
+resource "aws_instance" "app" {
+  count = var.instance_count
+
+  ami           = data.aws_ami.amazon_linux.id
+  instance_type = var.instance_type
+  ebs_optimized = true
+
+  subnet_id              = var.subnet_ids[count.index % length(var.subnet_ids)]
+  vpc_security_group_ids = var.security_group_ids
+
+  # Attach IAM role to EC2 instance
+  iam_instance_profile = aws_iam_instance_profile.ec2_profile.name
+
+  metadata_options {
+    http_endpoint = "enabled"
+    http_tokens   = "required"
+  }
+
+  user_data = <<-EOF
+    #!/bin/bash
+    sudo yum update -y
+    sudo yum install httpd -y
+    sudo systemctl enable httpd
+    sudo systemctl start httpd
+    echo "<html><body><div>Hello, world!</div></body></html>" > /var/www/html/index.html
+    EOF
+
+  tags = var.tags
+}
+```
+
+### 14. Re-run Security Scan Again
+
+After making the IAM role changes, run Checkov again:
+
+```sh
+checkov --config-file .\.checkov.yaml
+```
+
+**Expected Result:** The EC2 instance should now pass the IAM role check, further reducing the number of failed checks.
+
+## Advanced Checkov Features
+
+### 15. Skip Specific Checks
+
+You can skip specific checks using the configuration file instead of inline comments:
+
+```yaml
+# .checkov.yaml
+directory:
+  - .
+framework:
+  - terraform
+output: cli
+quiet: false
+soft-fail: false
+skip-path:
+  - .\tests  # Skip tests directory
+skip-check:
+  - CKV_AWS_8  # Skip EBS encryption check
+  - CKV_AWS_126  # Skip EC2 Monitoring check
+```
+
+This approach is cleaner than inline comments and allows you to manage all skipped checks in one place.
+
+### 16. Re-run Checkov with Updated Configuration
+
+After updating the `.checkov.yaml` file with the new skip-check settings, run Checkov again:
+
+```sh
+checkov --config-file .\.checkov.yaml
+```
+
+**Expected Result:** You should see no see zero failed checks due to the skipped EBS encryption and EC2 monitoring checks.
+
+```
+Passed checks: 10, Failed checks: 0, Skipped checks: 0
+```
+
+### 17. Generate Detailed Reports
 
 Generate a detailed report in JSON format:
 
 ```sh
-checkov -d . --output json --output-file-path checkov-report.json
+checkov --config-file .\.checkov.yaml --output json --output-file-path checkov-report.json
 ```
 
-### 13. Scan Specific Files
+### 18. Scan Specific Files
 
 Scan only specific Terraform files:
 
@@ -245,83 +374,16 @@ Scan only specific Terraform files:
 checkov -f main.tf -f variables.tf
 ```
 
-### 14. Use Different Output Formats
+### 19. Use Different Output Formats
 
 Try different output formats:
 
 ```sh
 # JUnit XML format for CI/CD integration
-checkov -d . --output junitxml --output-file-path checkov-report.xml
+checkov --config-file .\.checkov.yaml --output junitxml --output-file-path checkov-report.xml
 
 # SARIF format for GitHub integration
-checkov -d . --output sarif --output-file-path checkov-report.sarif
-```
-
-## Integration with Development Workflow
-
-### 15. Pre-commit Hook
-
-Create a pre-commit hook to run Checkov automatically:
-
-**For Windows PowerShell:**
-```powershell
-# Create .pre-commit-config.yaml
-@"
-repos:
-  - repo: https://github.com/bridgecrewio/checkov
-    rev: master
-    hooks:
-      - id: checkov
-        args: ['--directory', '.']
-"@ | Out-File -FilePath .pre-commit-config.yaml -Encoding UTF8
-
-# Install pre-commit
-pip install pre-commit
-pre-commit install
-```
-
-**For Windows Command Prompt:**
-```cmd
-# Create .pre-commit-config.yaml
-echo repos: > .pre-commit-config.yaml
-echo   - repo: https://github.com/bridgecrewio/checkov >> .pre-commit-config.yaml
-echo     rev: master >> .pre-commit-config.yaml
-echo     hooks: >> .pre-commit-config.yaml
-echo       - id: checkov >> .pre-commit-config.yaml
-echo         args: ['--directory', '.'] >> .pre-commit-config.yaml
-
-# Install pre-commit
-pip install pre-commit
-pre-commit install
-```
-
-### 16. CI/CD Integration
-
-Create a GitHub Actions workflow for automated scanning:
-
-```yaml
-# .github/workflows/checkov.yml
-name: Checkov Security Scan
-
-on:
-  push:
-    branches: [ main ]
-  pull_request:
-    branches: [ main ]
-
-jobs:
-  security:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v3
-    
-    - name: Run Checkov
-      uses: bridgecrewio/checkov-action@master
-      with:
-        directory: .
-        framework: terraform
-        output_format: cli
-        soft_fail: false
+checkov --config-file .\.checkov.yaml --output sarif --output-file-path checkov-report.sarif
 ```
 
 ## Expected Results
@@ -344,12 +406,7 @@ jobs:
 - Validates against industry standards
 - Provides audit trails for security reviews
 
-### 3. **Automated Workflow Integration**
-- Integrates with CI/CD pipelines
-- Provides pre-commit hooks for local development
-- Enables continuous security monitoring
-
-### 4. **Comprehensive Coverage**
+### 3. **Comprehensive Coverage**
 - Scans multiple cloud providers (AWS, Azure, GCP)
 - Supports various IaC frameworks
 - Covers security, compliance, and best practices
