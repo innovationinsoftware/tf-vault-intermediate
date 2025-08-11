@@ -15,7 +15,13 @@ This lab builds upon the previous labs. You should have completed:
 You should be familiar with:
 - Terraform configuration files
 - Basic security concepts
-- Command line tools
+- Command line tools (PowerShell or Command Prompt)
+
+**Windows Requirements:**
+- Python 3.8+ installed and added to PATH
+- Git for Windows (for pre-commit hooks)
+- PowerShell or Command Prompt
+- Optional: Chocolatey or Scoop package managers
 
 ## Install Checkov
 
