@@ -205,26 +205,47 @@ Notice that your current namespace is `admin/`.
 
 ## Part 7: Integration with HCP Terraform
 
-### Step 1: Configure Vault Provider
+### Step 1: Get Vault Cluster URL
 
-In your existing `learn-terraform-variables` repository (which is already connected to HCP Terraform via VCS), add Vault provider configuration:
+1. In HCP, navigate to your Vault cluster overview
+2. Go to the **Overview** page
+3. In the **Quick actions** pane, click **Public** Cluster URL
+4. Copy the URL (it will look like: `https://vault-cluster-xxxxx.region.hashicorp.cloud`)
+
+### Step 2: Add Vault Provider Configuration
+
+In your existing `learn-terraform-variables` repository, update the `main.tf` file:
+
+First, add Vault to the `required_providers` block (around line 8):
 
 ```hcl
-# main.tf
-terraform {
-  required_providers {
-    vault = {
-      source  = "hashicorp/vault"
-      version = "~> 4.0"
-    }
+# Update the existing required_providers block in main.tf
+required_providers {
+  aws = {
+    source = "hashicorp/aws"
+    version = "~> 3.76.0"
+  }
+  vault = {
+    source  = "hashicorp/vault"
+    version = "~> 4.0"
   }
 }
+```
 
+Then, update the existing Vault provider block (around line 20):
+
+```hcl
+# Update the existing provider "vault" block in main.tf
 provider "vault" {
-  address = "https://your-vault-cluster-url"
+  address = "https://your-actual-vault-cluster-url"  # Replace with your cluster URL
   token   = var.vault_token
 }
+```
 
+Add the vault_token variable to `variables.tf`:
+
+```hcl
+# Add to variables.tf
 variable "vault_token" {
   description = "Vault admin token"
   type        = string
@@ -232,54 +253,43 @@ variable "vault_token" {
 }
 ```
 
-### Step 2: Use AWS Credentials with Terraform
+### Step 3: Use AWS Credentials from Vault
+
+Add the following to your `main.tf` file to retrieve AWS credentials from Vault:
 
 ```hcl
-# aws.tf
+# Add this data source to main.tf (after the provider blocks, around line 25)
 data "vault_kv_secret_v2" "aws_creds" {
   mount = "kv-{your-initials}"
   name  = "aws/credentials"
 }
 
+# Update the existing provider "aws" block in main.tf (around line 17)
 provider "aws" {
-  region     = "us-west-2"
+  region     = "us-west-1"  # Keep existing region
   access_key = data.vault_kv_secret_v2.aws_creds.data["access_key_id"]
   secret_key = data.vault_kv_secret_v2.aws_creds.data["secret_access_key"]
 }
-
-resource "aws_instance" "example" {
-  ami           = "ami-12345678"
-  instance_type = "t2.micro"
-  
-  tags = {
-    Name = "vault-managed-instance"
-  }
-}
-
-output "instance_id" {
-  value = aws_instance.example.id
-}
 ```
 
-### Step 3: Get Vault Token
+### Step 4: Get Vault Token
 
 1. In your HCP Vault cluster, navigate to the **Overview** page
 2. In the **Quick actions** pane, click **Generate token**
 3. Copy the generated admin token (you'll need this for Terraform access)
 
-### Step 4: Update HCP Terraform Workspace Variables
+### Step 5: Update HCP Terraform Workspace Variables
 
 1. In your existing HCP Terraform workspace for `learn-terraform-variables` (already connected via VCS)
 2. Go to the **Variables** page
-<!-- 3. Remove any existing AWS credential variables (like `aws_access_key_id`, `aws_secret_access_key`) -->
+3. Remove any existing AWS credential variables (like `aws_access_key_id`, `aws_secret_access_key`)
 4. Add a new variable:
-   - **Variable Category**: Terraform Variable
    - **Key**: `vault_token`
    - **Value**: Paste the Vault admin token you generated
    - **Sensitive**: Check this box
 5. Save the variable
 
-### Step 5: Deploy with HCP Terraform
+### Step 6: Deploy with HCP Terraform
 
 1. Commit and push your changes to trigger a new run via VCS integration
 
