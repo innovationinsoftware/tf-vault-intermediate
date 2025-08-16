@@ -54,22 +54,22 @@ HCP Vault Dedicated is a fully managed Vault Enterprise service that enables you
 1. Click **Projects** in the navigation
 2. Click **+ Create project**
 3. Enter the following details:
-   - **Project name**: `vault-lab`
+   - **Project name**: `vault-lab-{your-initials}` (e.g., `vault-lab-js`)
    - **Project description**: `HCP Vault setup and configuration lab`
 4. Click **Create project**
 
 ### Step 3: Deploy Vault Cluster
 
-1. From the project overview page, click **Get started with Vault**
+1. From the project overview page, click **Vault Dedicated - Get started with Vault Dedicated**
 2. On the Vault overview page, click **Create cluster** under **Start from scratch**
 3. Select your preferred cloud provider (AWS, Azure, or GCP)
 4. Configure the cluster settings:
    - **Vault tier**: Development
    - **Cluster size**: Extra Small
-   - **Network ID**: Accept default or customize
-   - **Region**: Select your preferred region
-   - **CIDR block**: Accept default (10.0.0.0/16)
-5. Under **Basics**, set the **Cluster ID** to `vault-lab-cluster`
+   - **Network ID**: `hvn-{your-initials}` (e.g., `hvn-js`)
+   - **Region**: Accept default
+   - **CIDR block**: Accept default
+5. Under **Basics**, set the **Cluster ID** to `vault-lab-cluster-{your-initials}` (e.g., `vault-lab-cluster-js`)
 6. Under **Templates**, select **Start from scratch**
 7. Click **Create cluster**
 
@@ -95,7 +95,7 @@ When the HCP Vault Dedicated cluster has **private** access enabled, you will ne
 
 Notice that your current namespace is `admin/`.
 
-### Method 2: CLI Access
+<!-- ### Method 2: CLI Access
 
 **Prerequisite:** Install Vault CLI by following the [Install Vault guide](https://developer.hashicorp.com/vault/docs/install)
 
@@ -173,92 +173,41 @@ Notice that your current namespace is `admin/`.
    ```bash
    curl --header "X-Vault-Token: $VAULT_TOKEN" \
       $VAULT_ADDR/v1/admin/auth/token/lookup-self | jq -r ".data"
-   ```
+   ``` -->
 
 ## Part 4: Configuring HCP Vault
 
-### Step 1: Access Cluster Details
+## Part 1: Basic Vault Operations
 
-1. Once cluster provisioning is complete, refresh the page
-2. Review the **Cluster Details** pane for important information:
-   - Cluster ID
-   - Region
-   - Cloud provider
-   - Status
-
-### Step 2: Configure Network Access
-
-1. Click **Cluster networking**
-2. Review the public access settings:
-   - Development tier clusters are publicly accessible by default
-   - Production tier clusters have public access disabled by default
-3. Configure the **IP Allow list** if needed:
-   - Add your current IP address for secure access
-   - Add CIDR ranges for your organization
-4. Review the **HCP Proxy** settings:
-   - Enabled by default for development clusters
-   - Provides access to Vault UI when public access is disabled
-
-### Step 3: Generate Admin Token
-
-1. Return to the **Overview** page
-2. In the **Quick actions** pane, click **Generate token**
-3. Copy the generated admin token (you'll need this for initial configuration)
-4. Store the token securely - it provides full administrative access
-
-## Part 5: Initial Vault Configuration
-
-### Step 1: Access Vault UI
-
-1. In the **Quick actions** pane, click the **Public URL** link
-2. The Vault UI will open in a new tab
-3. You'll see the Vault initialization page
-
-### Step 2: Initialize Vault
-
-1. Enter the admin token you generated earlier
-2. Click **Sign In**
-3. You'll be redirected to the Vault dashboard
-
-### Step 3: Explore Vault Features
-
-1. **Secrets Engines**: Vault's core functionality for storing and managing secrets
-2. **Authentication Methods**: Configure how users and applications authenticate
-3. **Policies**: Define access control rules
-4. **Namespaces**: Organize Vault into isolated environments
-
-## Part 6: Basic Vault Operations
-
-### Step 1: Enable a Secrets Engine
+### Step 1: Enable KV Secrets Engine
 
 1. In the Vault UI, navigate to **Secrets** → **Enable new engine**
 2. Select **KV** (Key-Value) from the list
 3. Configure the KV engine:
-   - **Path**: `secret`
-   - **Version**: Version 2
+   - **Path**: `kv-{your-initials}` (e.g., `kv-js`)
+   - **Everything else**: Accept defaults
 4. Click **Enable Engine**
 
-### Step 2: Create a Secret
+### Step 2: Store AWS Credentials
 
-1. Navigate to the **secret** engine
+1. Navigate to the **kv-{your-initials}** engine
 2. Click **Create secret**
-3. Create a test secret:
-   - **Path**: `my-app/database`
-   - **Key**: `password`
-   - **Value**: `my-secure-password`
+3. Create a secret for AWS credentials:
+   - **Path**: `aws/credentials`
+   - **Key**: `access_key_id`
+   - **Value**: Your AWS access key
 4. Click **Save**
-
-### Step 3: Read a Secret
-
-1. Navigate to the secret path `my-app/database`
-2. Click on the secret to view its details
-3. Note the metadata and version information
+5. Create another secret:
+   - **Path**: `aws/credentials`
+   - **Key**: `secret_access_key`
+   - **Value**: Your AWS secret key
+6. Click **Save**
 
 ## Part 7: Integration with HCP Terraform
 
 ### Step 1: Configure Vault Provider
 
-Create a new Terraform configuration to interact with your HCP Vault cluster:
+In your existing `learn-terraform-variables` repository (which is already connected to HCP Terraform via VCS), add Vault provider configuration:
 
 ```hcl
 # main.tf
@@ -283,40 +232,64 @@ variable "vault_token" {
 }
 ```
 
-### Step 2: Create Secrets with Terraform
+### Step 2: Use AWS Credentials with Terraform
 
 ```hcl
-# secrets.tf
-resource "vault_kv_secret_v2" "app_secrets" {
-  mount = "secret"
-  name  = "my-app/config"
-  
-  data_json = jsonencode({
-    database_url = "postgresql://user:pass@localhost:5432/mydb"
-    api_key      = "sk-1234567890abcdef"
-    environment  = "production"
-  })
+# aws.tf
+data "vault_kv_secret_v2" "aws_creds" {
+  mount = "kv-{your-initials}"
+  name  = "aws/credentials"
 }
 
-output "secret_path" {
-  value = vault_kv_secret_v2.app_secrets.path
+provider "aws" {
+  region     = "us-west-2"
+  access_key = data.vault_kv_secret_v2.aws_creds.data["access_key_id"]
+  secret_key = data.vault_kv_secret_v2.aws_creds.data["secret_access_key"]
+}
+
+resource "aws_instance" "example" {
+  ami           = "ami-12345678"
+  instance_type = "t2.micro"
+  
+  tags = {
+    Name = "vault-managed-instance"
+  }
+}
+
+output "instance_id" {
+  value = aws_instance.example.id
 }
 ```
 
-### Step 3: Deploy with HCP Terraform
+### Step 3: Get Vault Token
 
-1. Create a new HCP Terraform workspace
-2. Connect your VCS repository
-3. Set the `vault_token` variable in the workspace
-4. Run `terraform plan` and `terraform apply`
+1. In your HCP Vault cluster, navigate to the **Overview** page
+2. In the **Quick actions** pane, click **Generate token**
+3. Copy the generated admin token (you'll need this for Terraform access)
+
+### Step 4: Update HCP Terraform Workspace Variables
+
+1. In your existing HCP Terraform workspace for `learn-terraform-variables` (already connected via VCS)
+2. Go to the **Variables** page
+<!-- 3. Remove any existing AWS credential variables (like `aws_access_key_id`, `aws_secret_access_key`) -->
+4. Add a new variable:
+   - **Variable Category**: Terraform Variable
+   - **Key**: `vault_token`
+   - **Value**: Paste the Vault admin token you generated
+   - **Sensitive**: Check this box
+5. Save the variable
+
+### Step 5: Deploy with HCP Terraform
+
+1. Commit and push your changes to trigger a new run via VCS integration
 
 ## Expected Results
 
 - Successfully created an HCP Vault Dedicated cluster
 - Configured network access and security settings
 - Accessed Vault through multiple methods (UI, CLI, API)
-- Performed basic Vault operations (create, read secrets)
-- Integrated Vault with HCP Terraform for automated secrets management
+- Performed basic Vault operations (stored AWS credentials in KV secrets)
+- Integrated Vault with HCP Terraform for automated AWS credential retrieval
 - Understanding of HCP Vault's managed service benefits
 
 ## Benefits of HCP Vault Integration
