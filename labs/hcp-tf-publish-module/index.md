@@ -19,12 +19,12 @@ Publishing modules to the HCP Terraform private registry allows teams to reuse, 
 #### 1. Create a New Module Repository
 
 - Choose a provider and module name. For this lab, we'll use AWS and create a simple S3 bucket module.
-- Name your repository using the convention: `terraform-aws-s3-bucket`.
-- **First, create a new repository in your VCS provider (e.g., GitHub) named `terraform-aws-s3-bucket`.**
+- Name your repository using the convention: `terraform-aws-s3-bucket-{your-initials}`.
+- **First, create a new repository in your VCS provider (e.g., GitHub) named `terraform-aws-s3-bucket-{your-initials}`.**
 - On your local machine, initialize a new directory and git repository:
   ```sh
-  mkdir terraform-aws-s3-bucket
-  cd terraform-aws-s3-bucket
+  mkdir terraform-aws-s3-bucket-{your-initials}
+  cd terraform-aws-s3-bucket-{your-initials}
   git init
   ```
 - Copy the provided files (`main.tf`, `variables.tf`, `outputs.tf`, `README.md`) from the `hcp-tf-publish-module` lab folder into your new repository directory.
