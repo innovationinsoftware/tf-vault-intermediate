@@ -96,8 +96,6 @@ Let's focus on preventing it through proper configuration and testing. Drift occ
 - Resource modifications by other team members
 - Cloud provider maintenance or updates
 
-### 7. Implement Drift Prevention Strategies
-
 To prevent drift, we'll implement several strategies:
 
 1. **Comprehensive tagging policies** - Ensure all resources have consistent tags
@@ -105,7 +103,7 @@ To prevent drift, we'll implement several strategies:
 3. **Regular monitoring** - Set up alerts for unexpected changes
 4. **Access controls** - Limit who can modify infrastructure outside of Terraform
 
-### 8. Add Drift Prevention Tests to the Module
+### 7. Add Drift Prevention Tests to the Module
 
 Navigate to your `terraform-aws-ec2-instance-tests-{your-initials}` module repository:
 
@@ -138,7 +136,7 @@ run "validate_ec2_instance_tags" {
 }
 ```
 
-### 9. Commit and Push Module Tests
+### 8. Commit and Push Module Tests
 
 ```sh
 git add .
@@ -146,7 +144,7 @@ git commit -m "Add drift prevention test for EC2 instance tags"
 git push
 ```
 
-### 10. Watch the Test Fail
+### 9. Watch the Test Fail
 
 1. Go to the HCP Terraform module registry
 2. Select the `ec2-instance-tests-{your-initials}` module
@@ -155,7 +153,7 @@ git push
 
 **Expected Result:** The test should fail because the `project` tag is missing from the variables.
 
-### 11. Fix the Test by Adding the Project Tag
+### 10. Fix the Test by Adding the Project Tag
 
 Update the test variables to include the project tag:
 
@@ -193,7 +191,7 @@ git push
 
 **Expected Result:** The test should now pass in HCP Terraform's module registry.
 
-### 12. Add a Second Test (After First Test Passes)
+### 11. Add a Second Test (After First Test Passes)
 
 Once your first test passes in HCP Terraform, add a second test to validate that instances have the correct instance type:
 
@@ -231,7 +229,7 @@ git push
 
 **Expected Result:** The test will fail because instances are created as t3.small but the test expects t2.micro.
 
-### 14. Fix the Test
+### 12. Fix the Test
 
 Revert the instance type back to t2.micro:
 
@@ -254,7 +252,7 @@ git push
 
 **Expected Result:** The test should now pass again.
 
-### 15. Apply Test Assertions to Module Variables
+### 13. Apply Test Assertions to Module Variables
 
 Now that we've tested our module, we can add these same validation rules directly to the module variables to prevent invalid configurations from being applied in the first place.
 
@@ -291,7 +289,7 @@ git commit -m "Add variable validations to prevent invalid configurations"
 git push
 ```
 
-### 16. Fix Existing Integration Tests
+### 14. Fix Existing Integration Tests
 
 **Important:** Adding validation rules to the module variables will cause **all existing integration tests to fail** because they don't have the correct tags and instance types.
 
@@ -316,7 +314,7 @@ git commit -m "Fix integration tests to comply with new variable validations"
 git push
 ```
 
-### 17. Create New Module Version
+### 15. Create New Module Version
 
 Now we need to create a new version tag for the module since we've added breaking changes (validation rules):
 
@@ -328,7 +326,7 @@ git push origin v1.1.0
 
 This will automatically publish the new version to the HCP Terraform module registry.
 
-### 18. Publish New Version in HCP Terraform UI
+### 16. Publish New Version in HCP Terraform UI
 
 1. Go to HCP Terraform module registry
 2. Navigate to your `ec2-instance-tests-{your-initials}` module
@@ -339,7 +337,7 @@ This will automatically publish the new version to the HCP Terraform module regi
 
 This ensures the new version with validation rules is available in the module registry.
 
-### 19. Test Variable Validations in Consuming Repository
+### 17. Test Variable Validations in Consuming Repository
 
 Now navigate to the consuming repository and test the validations:
 
@@ -366,7 +364,7 @@ module "ec2_instances" {
 }
 ```
 
-### 20. Push and Watch Plan Fail
+### 18. Push and Watch Plan Fail
 
 Commit and push the invalid configuration:
 
@@ -380,7 +378,7 @@ git push
 - "All EC2 instances must be t2.micro type"
 - "All EC2 instances must have project tag"
 
-### 21. Fix the Configuration
+### 19. Fix the Configuration
 
 Revert the module call back to valid values (same ones that passed our tests):
 
@@ -417,7 +415,7 @@ This approach prevents drift by:
 - **Enforcing business rules** - Only allowed instance types and counts can be used
 - **Preventing configuration drift** - Users can't accidentally specify invalid values
 
-### 22. Document Debugging Procedures
+### 20. Document Debugging Procedures
 
 Create a debugging guide for your team:
 
