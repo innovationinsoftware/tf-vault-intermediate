@@ -73,7 +73,7 @@ module "ec2_instances" {
 
 ## Requirements
 
-- Terraform >= 1.0
+- Terraform >= 1.7.0
 - AWS Provider >= 3.76
 ```
 
