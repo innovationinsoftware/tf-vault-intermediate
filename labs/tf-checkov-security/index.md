@@ -76,7 +76,7 @@ ftype Python.File="C:\Users\Admin\AppData\Local\Microsoft\WindowsApps\python.exe
 3. Then try running Checkov again:
 
 ```powershell
-.\checkov --version
+checkov --version
 ```
 
 **Note for VS Code Users:** If Checkov works in a regular PowerShell window but not in VS Code's integrated terminal:
@@ -88,7 +88,7 @@ ftype Python.File="C:\Users\Admin\AppData\Local\Microsoft\WindowsApps\python.exe
 ### 4. Navigate to Your Module Repository
 
 ```sh
-cd terraform-aws-ec2-instance-tests
+cd terraform-aws-ec2-instance-tests-{your-initials}
 ```
 
 ### 5. Run Initial Security Scan
@@ -146,7 +146,7 @@ output: cli
 quiet: false
 soft-fail: false
 skip-path:
-  - .\tests  # Skip tests directory
+  - \tests  # Skip tests directory
 ```
 
 ### 8. Re-run Checkov with Configuration
@@ -335,7 +335,7 @@ output: cli
 quiet: false
 soft-fail: false
 skip-path:
-  - .\tests  # Skip tests directory
+  - \tests  # Skip tests directory
 skip-check:
   - CKV_AWS_8  # Skip EBS encryption check
   - CKV_AWS_126  # Skip EC2 Monitoring check
