@@ -17,8 +17,8 @@
 
 1. In a browser, log into the [AWS Console](https://console.aws.amazon.com/) using the credentials in the README.   
 2. Search for IAM in the search bar.
-3. Click **IAM**
-4.Click **Users**.
+3. Click **IAM**  
+4. Click **Users**.
 5. Click **autodev-admin**.
 6. Click **Security Credentials**.
 7. Scroll down to **Access Keys**
