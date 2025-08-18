@@ -21,13 +21,13 @@ You should be familiar with:
 
 ### 1. Create GitHub Repository
 
-Navigate to GitHub and create a new repository named `terraform-aws-ec2-instance-tests`. The repository name must follow the format `terraform-<PROVIDER>-<NAME>` for HCP Terraform module registry compatibility.
+Navigate to GitHub and create a new repository named `terraform-aws-ec2-instance-tests-{your-initials}`. The repository name must follow the format `terraform-<PROVIDER>-<NAME>` for HCP Terraform module registry compatibility.
 
 ### 2. Clone the Repository
 
 ```sh
-git clone https://github.com/YOUR_USERNAME/terraform-aws-ec2-instance-tests
-cd terraform-aws-ec2-instance-tests
+git clone https://github.com/YOUR_USERNAME/terraform-aws-ec2-instance-tests-{your-initials}
+cd terraform-aws-ec2-instance-tests-{your-initials}
 ```
 
 ## Move Module and Tests
@@ -56,7 +56,7 @@ The module files you copied should already contain the necessary configuration. 
 Create a `README.md` file:
 
 ```markdown
-# terraform-aws-ec2-instance-tests
+# terraform-aws-ec2-instance-tests-{your-initials}
 
 A Terraform module for creating EC2 instances with integration tests.
 
@@ -64,7 +64,7 @@ A Terraform module for creating EC2 instances with integration tests.
 
 ```hcl
 module "ec2_instances" {
-  source = "app.terraform.io/YOUR_ORG/ec2-instance-tests/aws"
+  source = "app.terraform.io/YOUR_ORG/ec2-instance-tests-{your-initials}/aws"
   
   instance_count = 2
   instance_type  = "t2.micro"
