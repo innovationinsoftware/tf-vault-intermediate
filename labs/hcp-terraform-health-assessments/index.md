@@ -46,8 +46,11 @@ Before enabling health assessments, ensure your workspace meets these requiremen
 
 ### Step 1: Enable at Workspace Level
 
-1. Sign in to HCP Terraform and navigate to your workspace
-2. Verify that your workspace satisfies the health assessment requirements
+1. Sign in to HCP Terraform and navigate to your `tf-vault-qa-{your-initials}` workspace
+2. Verify that your workspace satisfies the health assessment requirements:
+   - Workspace has a Terraform configuration (EC2 instances)
+   - Workspace has AWS credentials configured
+   - Workspace has appropriate permissions
 3. Go to the workspace and click **Settings**, then click **Health**
 4. Select **Enable** under Health Assessments
 5. Click **Save settings**
@@ -85,7 +88,7 @@ After the first health assessment, HCP Terraform starts a new health assessment 
 
 On-demand health assessments allow administrators to manually trigger health evaluations:
 
-1. Navigate to the workspace's **Health** page
+1. Navigate to your `tf-vault-qa-{your-initials}` workspace's **Health** page
 2. Ensure you have administrator permissions for the workspace
 3. Verify the workspace satisfies all assessment requirements
 4. Click **Start health assessment**
@@ -104,7 +107,7 @@ On-demand health assessments allow administrators to manually trigger health eva
 
 1. Navigate to your organization's **Workspaces** page
 2. Look for **Health warning** status indicators for problematic workspaces
-3. You should see your `learn-terraform-variables` workspace listed
+3. You should see your `tf-vault-qa-{your-initials}` workspace listed
 4. Health warnings appear for workspaces with:
    - Infrastructure drift
    - Failed continuous validation checks
@@ -129,7 +132,7 @@ On-demand health assessments allow administrators to manually trigger health eva
 
 ### Viewing Drift Detection Results
 
-1. Navigate to your `learn-terraform-variables` workspace
+1. Navigate to your `tf-vault-qa-{your-initials}` workspace
 2. Click **Health** → **Drift**
 3. View the drift detection results from the latest health assessment
 4. You should see your EC2 instances and their current state
@@ -140,7 +143,7 @@ On-demand health assessments allow administrators to manually trigger health eva
 To see drift detection in action, you can manually modify an EC2 instance in the AWS console:
 
 1. Go to the AWS EC2 console
-2. Find one of your instances created by the `learn-terraform-variables` workspace
+2. Find one of your instances created by the `tf-vault-qa-{your-initials}` workspace
 3. Modify the instance type or add/remove tags
 4. Return to HCP Terraform and trigger another health assessment
 5. Observe how the drift is detected and reported
@@ -171,7 +174,7 @@ Continuous validation regularly verifies whether your configuration's custom ass
 
 ### Configuring Check Blocks
 
-Add check blocks to your Terraform configuration for continuous validation. In your `learn-terraform-variables` repository, you can add checks to validate your EC2 instances:
+Add check blocks to your Terraform configuration for continuous validation. In your `tf-vault-qa-{your-initials}` repository, you can add checks to validate your EC2 instances:
 
 ```hcl
 check "ec2_instance_health" {
@@ -203,7 +206,7 @@ check "instance_type_validation" {
 
 ### Viewing Continuous Validation Results
 
-1. Navigate to your `learn-terraform-variables` workspace
+1. Navigate to your `tf-vault-qa-{your-initials}` workspace
 2. Click **Health** → **Continuous validation**
 3. View all resources, outputs, and data sources with custom assertions
 4. Check whether assertions passed or failed
