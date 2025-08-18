@@ -242,7 +242,7 @@ To test your continuous validation checks:
 ## Expected Results
 
 By the end of this lab, you should have:
-- Successfully enabled health assessments on your `learn-terraform-variables` workspace
+- Successfully enabled health assessments on your `tf-vault-qa-{your-initials}` workspace
 - Triggered and observed on-demand health assessments for your EC2 instances
 - Viewed health status indicators at organization and workspace levels
 - Experienced drift detection and resolution workflows with your actual infrastructure

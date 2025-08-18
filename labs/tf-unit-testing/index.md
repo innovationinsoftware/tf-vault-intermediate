@@ -33,7 +33,7 @@ terraform {
   # cloud {
   #   organization = "sudo-cloud-org"
   #   workspaces {
-  #     name = "tf-vault-qa-an"
+  #     name = "tf-vault-qa-{your-initials}"
   #   }
   # }
   required_providers {
