@@ -30,12 +30,12 @@ First, update your `main.tf` to pin the AWS provider to a compatible version tha
 
 ```hcl
 terraform {
-  <!-- cloud {
-    organization = "sudo-cloud-org"
-    workspaces {
-      name = "policy-dev-an"
-    }
-  } -->
+  # cloud {
+  #   organization = "sudo-cloud-org"
+  #   workspaces {
+  #     name = "policy-dev-an"
+  #   }
+  # }
   required_providers {
     aws = {
       source  = "hashicorp/aws"
