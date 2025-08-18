@@ -123,7 +123,7 @@ terraform destroy
 
 3. Verify the workspace is removed from HCP Terraform
 
-### Step 5: Clean Up HCP Vault and Network
+### Step 5: Clean Up Terraform resources, HCP Vault and Network
 
 **Important**: Clean up in the correct order to avoid dependency issues.
 
