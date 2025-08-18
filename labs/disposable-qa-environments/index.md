@@ -41,19 +41,18 @@ Disposable QA environments are temporary workspaces that:
 
 ## Part 2: Setup TFE Provider
 
-### Step 1: Create Workspace Management Repository
+### Step 1: Create Local Workspace Management Directory
 
-1. Create a new GitHub repository named `qa-workspace-manager-{your-initials}`
-2. Clone the repository locally:
+1. Create a new directory for managing QA workspaces:
 
 ```sh
-git clone https://github.com/YOUR_USERNAME/qa-workspace-manager-{your-initials}
+mkdir qa-workspace-manager-{your-initials}
 cd qa-workspace-manager-{your-initials}
 ```
 
 ### Step 2: Copy the Configuration Files
 
-The lab includes the following Terraform files. Copy them to your repository:
+The lab includes the following Terraform files. Copy them to your directory:
 
 - `main.tf` - Main workspace management configuration
 - `variables.tf` - Variables for workspace management
@@ -80,13 +79,22 @@ The QA environment infrastructure is already configured in the `environments/qa/
 
 ### Step 1: Create QA Environment
 
-1. Set up your local environment variables:
+1. Get your HCP Terraform API token:
+   - Go to https://app.terraform.io
+   - Click on your user icon in the top-right corner
+   - Select "User settings"
+   - Go to "Tokens" tab
+   - Click "Create an API token"
+   - Give it a name (e.g., "QA Environment Management")
+   - Copy the generated token (you won't be able to see it again)
+
+2. Set up your local environment variables:
 
 ```sh
-export TF_VAR_tfe_token="your-hcp-terraform-token"
-export TF_VAR_organization_name="your-organization-name"
-export TF_VAR_aws_access_key_id="your-aws-access-key"
-export TF_VAR_aws_secret_access_key="your-aws-secret-key"
+export TF_VAR_tfe_token=your-hcp-terraform-token
+export TF_VAR_organization_name=your-organization-name
+export TF_VAR_aws_access_key_id=your-aws-access-key
+export TF_VAR_aws_secret_access_key=your-aws-secret-key
 ```
 
 2. Initialize and apply:
@@ -104,13 +112,6 @@ terraform apply
 3. Verify the new workspace is created with the random name
 4. Check that variables are configured
 
-### Step 3: Deploy Infrastructure
-
-1. Go to the created workspace
-2. Click "Queue plan"
-3. Review the plan and apply
-4. Verify the EC2 instance is created
-
 ### Step 4: Cleanup
 
 1. Go back to your local terminal
@@ -121,6 +122,36 @@ terraform destroy
 ```
 
 3. Verify the workspace is removed from HCP Terraform
+
+### Step 5: Clean Up HCP Vault and Network
+
+**Important**: Clean up in the correct order to avoid dependency issues.
+
+1. **Delete tf-vault-qa-{your-initials} Workspace Resources**:
+   - Go to https://app.terraform.io
+   - Navigate to your tf-vault-qa-{your-initials} workspace
+   - Go to Settings → Destruction and deletion
+   - Click "Queue destroy plan"
+   - Navigate to the Runs tab
+   - Review the destroy plan and click "Confirm & Apply"
+   - Wait for the destroy to complete
+
+2. **Delete HCP Vault Cluster**:
+   - Go to https://portal.cloud.hashicorp.com
+   - Navigate to Vault → Active Resources
+   - Find your vault cluster (vault-lab-cluster-{your-initials})
+   - Click "Manage" → "Delete cluster"
+   - Confirm the deletion
+   - **Wait for the cluster deletion to complete** (this may take several minutes)
+
+2. **Delete HCP Virtual Network (HVN)**:
+   - Go to https://portal.cloud.hashicorp.com
+   - Navigate to Vault → Active Resources
+   - Find your HVN (hvn-{your-initials})
+   - Click "Manage" → "Delete HashiCorp Virtual Network"
+   - Confirm the deletion
+
+**Note**: The workspace resources must be deleted before the Vault cluster to avoid authentication failures. The HVN must be deleted after the Vault cluster since the cluster depends on the network. Make sure each deletion is complete before proceeding to the next step.
 
 ## Expected Results
 
