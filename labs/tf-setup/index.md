@@ -15,8 +15,7 @@
 
 ### **Step 1: Log into the AWS Console**
 
-1. In a browser, log into the [AWS Console](https://console.aws.amazon.com/) using the credentials in the spreadsheet below.   
-[AWS accounts](https://docs.google.com/spreadsheets/d/18BfLnLeWcqQdujzK9TJdhEzRXunk20yRhPEwwAhMLj4/edit?usp=sharing)
+1. In a browser, log into the [AWS Console](https://console.aws.amazon.com/) using the credentials in the README.   
 2. Search for IAM in the search bar.
 3. Click **IAM**
 4.Click **Users**.
