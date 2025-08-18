@@ -44,7 +44,7 @@ Update your `main.tf` to use the remote EC2 instance module from HCP Terraform, 
 
 # Use remote module from HCP Terraform
 module "ec2_instances" {
-  source  = "app.terraform.io/<Your-Org>/ec2-instance-tests/aws"
+  source  = "app.terraform.io/<Your-Org>/ec2-instance-tests-{your-initials}/aws"
   version = "1.0.0"
 
   instance_count     = var.instance_count
@@ -60,7 +60,7 @@ module "ec2_instances" {
 
 <!-- delete this -->
 module "s3_bucket" {
-  source      = "app.terraform.io/<Your-Org>/s3-bucket/aws"
+  source      = "app.terraform.io/<Your-Org>/s3-bucket-{your-initials}/aws"
   version     = "1.0.0"
   bucket_name = "my-bucket"
 }
@@ -107,10 +107,10 @@ To prevent drift, we'll implement several strategies:
 
 ### 8. Add Drift Prevention Tests to the Module
 
-Navigate to your `terraform-aws-ec2-instance-tests` module repository:
+Navigate to your `terraform-aws-ec2-instance-tests-{your-initials}` module repository:
 
 ```sh
-cd ../terraform-aws-ec2-instance-tests
+cd ../terraform-aws-ec2-instance-tests-{your-initials}
 ```
 
 Add the following to your tests/integration.tftest.hcl file to validate that EC2 instances have the required project tag:
@@ -149,7 +149,7 @@ git push
 ### 10. Watch the Test Fail
 
 1. Go to the HCP Terraform module registry
-2. Select the `ec2-instance-tests` module
+2. Select the `ec2-instance-tests-{your-initials}` module
 3. Navigate to the "Tests" tab
 4. Watch the test run automatically through VCS integration
 
@@ -261,7 +261,7 @@ Now that we've tested our module, we can add these same validation rules directl
 Update the `variables.tf` file in the module to add validation blocks using the exact same logic from our tests:
 
 ```hcl
-# variables.tf in terraform-aws-ec2-instance-tests
+# variables.tf in terraform-aws-ec2-instance-tests-{your-initials}
 variable "instance_type" {
   description = "EC2 instance type"
   type        = string
@@ -331,7 +331,7 @@ This will automatically publish the new version to the HCP Terraform module regi
 ### 18. Publish New Version in HCP Terraform UI
 
 1. Go to HCP Terraform module registry
-2. Navigate to your `ec2-instance-tests` module
+2. Navigate to your `ec2-instance-tests-{your-initials}` module
 3. Click "Publish new version"
 4. Select the latest commit (the one with "Add variable validations to prevent invalid configurations")
 5. Type "1.1.0" as the version number
@@ -352,7 +352,7 @@ Temporarily modify the module call in `main.tf` to use the new module tag, and u
 ```hcl
 # Temporarily modify the module call in main.tf
 module "ec2_instances" {
-  source  = "app.terraform.io/<Your-Org>/ec2-instance-tests/aws"
+  source  = "app.terraform.io/<Your-Org>/ec2-instance-tests-{your-initials}/aws"
   version = "1.1.0"
 
   instance_count     = var.instance_count
@@ -387,7 +387,7 @@ Revert the module call back to valid values (same ones that passed our tests):
 ```hcl
 # Fix the module call in main.tf
 module "ec2_instances" {
-  source  = "app.terraform.io/<Your-Org>/ec2-instance-tests/aws"
+  source  = "app.terraform.io/<Your-Org>/ec2-instance-tests-{your-initials}/aws"
   version = "1.1.0"
 
   instance_count     = 2
