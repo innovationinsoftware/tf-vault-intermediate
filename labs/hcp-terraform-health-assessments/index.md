@@ -55,17 +55,6 @@ Before enabling health assessments, ensure your workspace meets these requiremen
 4. Select **Enable** under Health Assessments
 5. Click **Save settings**
 
-### Step 2: Enable at Organization Level (Optional)
-
-Organization owners can enforce health assessments across all eligible workspaces:
-
-1. Navigate to your HCP Terraform organization
-2. Go to **Settings** → **General**
-3. Find the Health Assessments section
-4. Enable organization-wide health assessments
-
-**Note**: Enforcing health assessments at the organization level overrides workspace-level settings.
-
 ## Part 3: Health Assessment Scheduling
 
 ### Understanding First Assessment Timing
@@ -89,9 +78,8 @@ After the first health assessment, HCP Terraform starts a new health assessment 
 On-demand health assessments allow administrators to manually trigger health evaluations:
 
 1. Navigate to your `tf-vault-qa-{your-initials}` workspace's **Health** page
-2. Ensure you have administrator permissions for the workspace
-3. Verify the workspace satisfies all assessment requirements
-4. Click **Start health assessment**
+2. Verify the workspace satisfies all assessment requirements. If you see a message saying no
+3. Click **Start health assessment**
 
 ### On-Demand Assessment Behavior
 

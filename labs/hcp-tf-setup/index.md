@@ -51,7 +51,7 @@ You will be prompted to confirm that you want to authenticate. Type `yes` and pr
 
 #### 5. Generate an API Token
 
-A browser window will open to the HCP Terraform login screen. Enter the HCP terraform credentials you have been provided, enter a token name (or use the default), then click **Create API token** to generate your authentication token.
+A browser window will open to the HCP Terraform login screen at https://app.terraform.io. Enter the HCP terraform credentials you have been provided, enter a token name (or use the default), then click **Create API token** to generate your authentication token.
 
 If your browser does not open automatically, copy and paste the provided URL from your terminal into your browser.
 
