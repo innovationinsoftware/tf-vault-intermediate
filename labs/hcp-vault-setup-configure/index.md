@@ -210,7 +210,7 @@ Notice that your current namespace is `admin/`.
 1. In HCP, navigate to your Vault cluster overview
 2. Go to the **Overview** page
 3. In the **Quick actions** pane, click **Public** Cluster URL
-4. Copy the URL (it will look like: `https://vault-cluster-xxxxx.region.hashicorp.cloud`)
+4. Copy the URL (it will look like: `https://vault-cluster-xxxxx.region.hashicorp.cloud:8200`)
 
 ### Step 2: Add Vault Provider Configuration
 
@@ -334,15 +334,6 @@ provider "aws" {
 - **Basic Operations:** Creating and managing secrets
 - **Terraform Integration:** Automating Vault operations
 - **Security Best Practices:** Implementing proper access controls
-
-## Next Steps
-
-After completing this lab, you can:
-- Configure authentication methods (LDAP, OIDC, etc.)
-- Set up dynamic secrets for databases and cloud services
-- Implement Vault policies for access control
-- Integrate Vault with your application deployment pipelines
-- Explore advanced features like transit encryption and PKI
 
 ## Additional Resources
 
