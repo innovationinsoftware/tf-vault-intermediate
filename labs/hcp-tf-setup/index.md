@@ -36,7 +36,7 @@ HCP Terraform runs Terraform operations and stores state remotely, providing a s
 
 #### 3. Prerequisites
 
-- Terraform CLI (version 1.1.0+) installed locally
+- Terraform CLI (version 1.7.0+) installed locally
 - An HCP Terraform account
 
 #### 4. Start the Login Flow
