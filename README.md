@@ -1,6 +1,6 @@
 # Intermediate Terraform and Vault Workflows Course Site
 
-# Surveys 
+## Surveys 
 [Day 1 survey](https://www.surveymonkey.com/r/J67Y67Y)
 
 This site includes the labs for the Intermediate Terraform Vault class.
