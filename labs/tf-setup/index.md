@@ -5,7 +5,7 @@
 ### Step 1: Clone the repo
 
 1. Open Visual Studio Code
-2. In Visual Studio Code, click **Clone Repository** and paste `https://github.com/innovationinsoftware/policy-dev`
+2. In Visual Studio Code, click **Clone Repository** and paste `https://github.com/innovationinsoftware/tf-vault-intermediate`
 3. Hit **Enter**, and in the pop-up window, browse to `C:\Users\tekstudent\Downloads\repos`
 4. Click **Select as repository destination**
 5. When prompted to open the cloned repo, choose **Open**.
