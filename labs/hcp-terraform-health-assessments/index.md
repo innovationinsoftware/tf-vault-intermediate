@@ -78,27 +78,18 @@ After the first health assessment, HCP Terraform starts a new health assessment 
 On-demand health assessments allow administrators to manually trigger health evaluations:
 
 1. Navigate to your `tf-vault-qa-{your-initials}` workspace's **Health** page
-2. Verify the workspace satisfies all assessment requirements. If you see a message saying no
+2. Verify the workspace satisfies all assessment requirements. If not, run a new plan and apply in your workspace, and this error message should resolve.
 3. Click **Start health assessment**
 
-### On-Demand Assessment Behavior
+### Expected Results
 
-- Only available in the HCP Terraform user interface
-- Requires administrator permissions for the workspace
-- Workspace must satisfy all assessment requirements
-- Cannot trigger another assessment while one is in progress
-- Resets the scheduling for automated assessments
+After triggering the assessment, you should see:
+- Health assessment status in the Health page
+- Results showing your EC2 instances and their current state
+- A message indicating "no drift detected" if your infrastructure matches your Terraform configuration
+- Any drift detected between your Terraform configuration and actual AWS resources (if present)
 
 ## Part 5: Health Status Visibility
-
-### Organization-Level Health Status
-
-1. Navigate to your organization's **Workspaces** page
-2. Look for **Health warning** status indicators for problematic workspaces
-3. You should see your `tf-vault-qa-{your-initials}` workspace listed
-4. Health warnings appear for workspaces with:
-   - Infrastructure drift
-   - Failed continuous validation checks
 
 ### Workspace-Level Health Status
 
@@ -107,14 +98,6 @@ On-demand health assessments allow administrators to manually trigger health eva
 3. The health bar summarizes the results of the last health assessment:
    - **Drift summary**: Shows total number of resources vs. drifted resources
    - **Checks summary**: Shows passed, failed, and unknown validation status counts
-
-### Explorer View
-
-1. Navigate to **Explorer** in your HCP Terraform organization
-2. View condensed overview of health status across all workspaces:
-   - Workspaces monitoring health
-   - Status of configured continuous validation checks
-   - Count of drifted resources for each workspace
 
 ## Part 6: Viewing and Resolving Drift
 
@@ -126,30 +109,31 @@ On-demand health assessments allow administrators to manually trigger health eva
 4. You should see your EC2 instances and their current state
 5. If drift is detected, HCP Terraform shows the necessary changes to bring infrastructure back in sync
 
-### Creating Intentional Drift (Optional)
+### Creating Intentional Drift
 
 To see drift detection in action, you can manually modify an EC2 instance in the AWS console:
 
-1. Go to the AWS EC2 console
-2. Find one of your instances created by the `tf-vault-qa-{your-initials}` workspace
-3. Modify the instance type or add/remove tags
-4. Return to HCP Terraform and trigger another health assessment
-5. Observe how the drift is detected and reported
+1. Go to the AWS EC2 console at https://console.aws.amazon.com/ec2/
+2. Login with your provided AWS credentials
+3. Select **us-west-1** (or the region you selected in your Terraform configuration) from the region dropdown in the top-right corner
+4. In the left navigation pane, click **Instances (running)**
+5. Find one of your instances created by the `tf-vault-qa-{your-initials}` workspace 
+4. Select the instance and click **Actions** → **Instance settings** → **Manage tags**
+5. In the Tags section, find the "project" tag and change its value from "project-alpha" to "project-beta"
+6. Click **Save** to apply the tag change
+7. Return to HCP Terraform and navigate to your workspace's **Health** page
+8. Click **Start health assessment** again
+9. After the assessment completes, this should show any detected drift.
+10. Observe how HCP Terraform shows the difference between your Terraform configuration (project-alpha) and the actual AWS resource (project-beta)
 
 ### Drift Resolution Approaches
 
-When drift is detected, you have two main approaches to resolve it:
+When drift is detected, resolve it by reverting the change.
 
-#### Approach 1: Overwrite Drift
+#### Remediate Drift
 If you don't want to keep the drift's changes:
 1. Queue a new plan in your workspace
 2. Apply the changes to revert your real-world infrastructure to match your Terraform configuration
-
-#### Approach 2: Update Terraform Configuration
-If you want to keep the drift's changes:
-1. Modify your Terraform configuration to include the changes
-2. Push a new configuration version
-3. This prevents Terraform from reverting the drift during the next apply
 
 ## Part 7: Continuous Validation
 
@@ -160,55 +144,12 @@ Continuous validation regularly verifies whether your configuration's custom ass
 - Validating API gateway certificates
 - Checking resource availability
 
-### Configuring Check Blocks
-
-Add check blocks to your Terraform configuration for continuous validation. In your `tf-vault-qa-{your-initials}` repository, you can add checks to validate your EC2 instances:
-
-```hcl
-check "ec2_instance_health" {
-  data "aws_instance" "current" {
-    instance_tags = {
-      Name = "web-server-1"
-    }
-  }
-  
-  assert {
-    condition     = data.aws_instance.current.instance_state == "running"
-    error_message = "EC2 instance should be in running state"
-  }
-}
-
-check "instance_type_validation" {
-  data "aws_instance" "current" {
-    instance_tags = {
-      Name = "web-server-1"
-    }
-  }
-  
-  assert {
-    condition     = data.aws_instance.current.instance_type == "t2.micro"
-    error_message = "EC2 instance should be t2.micro type"
-  }
-}
-```
-
 ### Viewing Continuous Validation Results
 
 1. Navigate to your `tf-vault-qa-{your-initials}` workspace
 2. Click **Health** → **Continuous validation**
 3. View all resources, outputs, and data sources with custom assertions
 4. Check whether assertions passed or failed
-5. Review error messages for failed assertions
-
-### Testing Continuous Validation
-
-To test your continuous validation checks:
-
-1. Add the check blocks above to your `main.tf` file
-2. Commit and push the changes to trigger a new run
-3. After the run completes, navigate to **Health** → **Continuous validation**
-4. Observe how the checks validate your EC2 instances
-5. Try modifying an instance in AWS console and trigger another health assessment to see validation failures
 
 ## Part 8: Best Practices
 
