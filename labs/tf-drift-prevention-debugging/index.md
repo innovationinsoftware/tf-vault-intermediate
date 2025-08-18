@@ -330,8 +330,8 @@ This will automatically publish the new version to the HCP Terraform module regi
 
 1. Go to HCP Terraform module registry
 2. Navigate to your `ec2-instance-tests-{your-initials}` module
-3. Click "Publish new version"
-4. Select the latest commit (the one with "Add variable validations to prevent invalid configurations")
+3. Click "Publish new version" on the right hand side
+4. Select the latest commit (the one with "Fix integration tests to comply with new variable validations")
 5. Type "1.1.0" as the version number
 6. Click "Publish version"
 
