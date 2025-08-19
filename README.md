@@ -26,3 +26,15 @@ Lab 5: [HCP Terraform Setup](labs/hcp-tf-setup/index.md)
 Lab 6: [HCP Terraform Modify Infrastructure](labs/hcp-tf-modify/index.md)
 
 Lab 7: [HCP Terraform Publish Module](labs/hcp-tf-publish-module/index.md)
+
+### Day 2
+
+Lab 8: [Terraform Unit Testing](labs/tf-unit-testing/index.md)
+
+Lab 9: [HCP Terraform Integration Testing](labs/tf-integration-testing/index.md)
+
+Lab 10: [Checkov Static Code Analysis](labs/tf-checkov-security/index.md)
+
+Lab 11: [Drift Prevention and Debugging](labs/tf-drift-prevention-debugging/index.md)
+
+Lab 12: [HCP Terraform Workspace health and Drift Detection](labs/hcp-terraform-health-assessments/index.md)
