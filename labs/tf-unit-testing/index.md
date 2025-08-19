@@ -24,7 +24,16 @@ Your existing configuration includes:
 
 ## Prepare Your Configuration for Testing
 
-### 1. Fix Provider Version Compatibility
+### 1. Remove AWS Credentials
+
+If you have AWS credentials configured using `aws configure`, remove them for this lab:
+
+```sh
+rm ~/.aws/credentials
+rm ~/.aws/config
+```
+
+### 2. Fix Provider Version Compatibility
 
 First, update your `main.tf` to pin the AWS provider to a compatible version that works with the VPC module:
 
@@ -45,7 +54,7 @@ terraform {
 }
 ```
 
-### 2. Comment Out HCP Terraform Module
+### 3. Comment Out HCP Terraform Module
 
 Since you're running unit tests locally, you don't have access to the HCP Terraform private registry. Comment out the S3 bucket module call in your `main.tf`:
 
@@ -57,7 +66,7 @@ Since you're running unit tests locally, you don't have access to the HCP Terraf
 # }
 ```
 
-### 3. Initialize Terraform
+### 4. Initialize Terraform
 
 Run terraform init to download the correct provider version:
 
@@ -67,7 +76,7 @@ terraform init -upgrade
 
 ## Create Unit Tests for Your Configuration
 
-### 4. Create Test Directory
+### 5. Create Test Directory
 
 In your `learn-terraform-variables` repository, create a new directory for tests:
 
@@ -76,7 +85,7 @@ mkdir tests
 cd tests
 ```
 
-### 5. Test EC2 Instance Module
+### 6. Test EC2 Instance Module
 
 Create a test file `ec2_instance_tests.tftest.hcl` to validate your custom EC2 instance module:
 
@@ -98,7 +107,7 @@ run "test_ec2_instance_count" {
 }
 ```
 
-### 3. Test Variable Validation
+### 7. Test Variable Validation
 
 Create a test file `variable_validation_tests.tftest.hcl` to test variable constraints:
 
