@@ -75,7 +75,6 @@ module "ec2_instances" {
 
 - Terraform >= 1.7.0
 - AWS Provider >= 3.76
-```
 
 ## Create Integration Tests
 
