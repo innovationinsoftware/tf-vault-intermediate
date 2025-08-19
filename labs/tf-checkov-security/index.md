@@ -60,7 +60,7 @@ Add the Python Scripts directory to your PATH environment variable:
 1. Open System Properties (Win + R, type `sysdm.cpl`)
 2. Click Advanced > "Environment Variables"
 3. Under "User variables", find "Path" and click "Edit"
-4. Click "New" and add: `C:\Users\Admin\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\Scripts`
+4. Click "New" and add: `%USERPROFILE%\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\Scripts`
 5. Click "OK" on all dialogs
 6. Close and reopen PowerShell
 
@@ -70,7 +70,7 @@ Add the Python Scripts directory to your PATH environment variable:
 
 ```cmd
 assoc .py=Python.File
-ftype Python.File="C:\Users\Admin\AppData\Local\Microsoft\WindowsApps\python.exe" "%1" %*
+ftype Python.File="%USERPROFILE%\AppData\Local\Microsoft\WindowsApps\python.exe" "%1" %*
 ```
 
 3. Then try running Checkov again:
