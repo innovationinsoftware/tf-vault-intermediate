@@ -38,3 +38,6 @@ Lab 10: [Checkov Static Code Analysis](labs/tf-checkov-security/index.md)
 Lab 11: [Drift Prevention and Debugging](labs/tf-drift-prevention-debugging/index.md)
 
 Lab 12: [HCP Terraform Workspace health and Drift Detection](labs/hcp-terraform-health-assessments/index.md)
+
+### Day 3
+Lab 8: [Install Vault](labs/install-vault/index.md)
