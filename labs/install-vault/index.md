@@ -164,7 +164,7 @@ excited    yes
 foo        world
 ```
 
-To print only the value of a given field, use the `-field=&lt;key_name&gt;` flag.   
+To print only the value of a given field, use the `-field=<key_name>` flag.   
 
 ```
 vault kv get -field=excited secret/hello

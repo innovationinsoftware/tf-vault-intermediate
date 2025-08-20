@@ -8,7 +8,6 @@ The KV secrets engine v1 does not provide a way to version or roll back secrets.
 ## Solution
 Run the version 2 of KV secrets engine which can retain a configurable number of secret versions. This enables older versions' data to be retrievable in case of unwanted deletion or updates of the data. In addition, its Check-and-Set operations can be used to protect the data from being overwritten unintentionally.
 
-![key-value versioning](https://learn.hashicorp.com/img/vault-versioned-kv-1.png)
 ## Step 1: Enable the KV secrets engine version 2
 ```
 vault kv enable-versioning secret/
