@@ -72,10 +72,10 @@ Open a new terminal window and SSH into the server.
 
 **Note:** If working in the ```AWS CloudShell``` environment, you can create a new terminal by typing &lt;ctrl-b&gt; then 'c'
 
-In the new terminal export the following: 
+In the new terminal set the following environment variables: 
 ```
-export VAULT_ADDR='http://0.0.0.0:8200'
-export VAULT_TOKEN=<token saved from previous step in lab>
+$env:VAULT_ADDR='http://0.0.0.0:8200'
+$env:VAULT_TOKEN=<token saved from previous step in lab>
 ```
 
 For example if running the vault server produced the following lines as part of it's output:
