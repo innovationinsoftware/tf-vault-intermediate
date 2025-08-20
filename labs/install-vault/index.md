@@ -188,9 +188,7 @@ Pipe `vault kv get` output into `jq` to extract results.
 vault kv get -format=json secret/hello | jq -r .data.data.excited
 ```
 
-You can also view the secret in the UI by visiting the server's public IP address on port `8200`. 
-
-**Note:** If running in the ```AWS CloudShell``` we don't have access to that port.
+You can also view the secret in the UI by visiting the server's IP address on port `8200`. 
 
 
 Now that you've learned how to read and write a secret, let's go ahead and delete it. You can do so using the `vault kv delete` command.
