@@ -62,7 +62,7 @@ HCP Vault Dedicated is a fully managed Vault Enterprise service that enables you
 
 1. From the project overview page, click **Vault Dedicated - Get started with Vault Dedicated**
 2. On the Vault overview page, click **Create cluster** under **Start from scratch**
-3. Select your preferred cloud provider (AWS, Azure, or GCP)
+3. Select AWS
 4. Configure the cluster settings:
    - **Vault tier**: Development
    - **Cluster size**: Extra Small
@@ -95,89 +95,7 @@ When the HCP Vault Dedicated cluster has **private** access enabled, you will ne
 
 Notice that your current namespace is `admin/`.
 
-<!-- ### Method 2: CLI Access
-
-**Prerequisite:** Install Vault CLI by following the [Install Vault guide](https://developer.hashicorp.com/vault/docs/install)
-
-1. Under **Quick actions**, click **Public** Cluster URL
-2. In a terminal, set the `VAULT_ADDR` environment variable:
-   ```bash
-   export VAULT_ADDR=<Public_Cluster_URL>
-   ```
-3. Verify your connectivity to the Vault cluster:
-   ```bash
-   vault status
-   ```
-   Expected output:
-   ```
-   Key                      Value
-   ---                      -----
-   Recovery Seal Type       shamir
-   Initialized              true
-   Sealed                   false
-   Total Recovery Shares    1
-   Threshold                1
-   Version                  1.6.0+ent
-   Storage Type             raft
-   ```
-4. Return to the **Overview** page and click **Generate token**
-5. Copy the **Admin Token**
-6. Return to the terminal and log in with Vault:
-   ```bash
-   vault login
-   Token (will be hidden): <token>
-   ```
-7. View the current token configuration:
-   ```bash
-   vault token lookup
-   ```
-   Notice that `namespace_path` is `admin/`. This indicates that you are logged into the `admin` namespace.
-8. Set the `VAULT_NAMESPACE` environment variable:
-   ```bash
-   export VAULT_NAMESPACE="admin"
-   ```
-
-### Method 3: API Access with cURL
-
-**Prerequisite:** Install `jq` for JSON processing
-
-1. Under **Quick actions**, click the **Public** Cluster URL
-2. In a terminal, set the `VAULT_ADDR` environment variable:
-   ```bash
-   export VAULT_ADDR=<Public_Cluster_URL>
-   ```
-3. Return to the **Overview** page and click **Generate token**
-4. Copy the **Admin Token**
-5. Set the `VAULT_TOKEN` environment variable:
-   ```bash
-   export VAULT_TOKEN=<token>
-   ```
-6. Verify connectivity using one of these methods:
-
-   **Option 1:** Specify the target namespace in the `X-Vault-Namespace` header:
-   ```bash
-   curl --header "X-Vault-Token: $VAULT_TOKEN" \
-      --header "X-Vault-Namespace: admin" \
-      $VAULT_ADDR/v1/auth/token/lookup-self | jq -r ".data"
-   ```
-
-   **Option 2:** Use environment variable for namespace:
-   ```bash
-   export VAULT_NAMESPACE=admin
-   curl --header "X-Vault-Token: $VAULT_TOKEN" \
-      --header "X-Vault-Namespace: $VAULT_NAMESPACE" \
-      $VAULT_ADDR/v1/auth/token/lookup-self | jq -r ".data"
-   ```
-
-   **Option 3:** Prepend the API endpoint with namespace:
-   ```bash
-   curl --header "X-Vault-Token: $VAULT_TOKEN" \
-      $VAULT_ADDR/v1/admin/auth/token/lookup-self | jq -r ".data"
-   ``` -->
-
 ## Part 4: Configuring HCP Vault
-
-## Part 1: Basic Vault Operations
 
 ### Step 1: Enable KV Secrets Engine
 
