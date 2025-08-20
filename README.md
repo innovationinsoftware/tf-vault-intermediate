@@ -46,4 +46,8 @@ Lab 14: [Vault Secrets](labs/vault-secrets/index.md)
 
 Lab 15: [Vault Policies](labs/vault-policies/index.md)
 
-Lab 15: [HCP Terraform & Vault Integration](labs/hcp-vault-setup-configure/index.md)
+Lab 16: [HCP Terraform & Vault Integration](labs/hcp-vault-setup-configure/index.md)
+
+Lab 17: [HCP Terraform & Vault Integration](labs/hcp-vault-setup-configure/index.md)
+
+Lab 18: [Disposable QA Environments](labs/disposable-qa-environments/index.md)
