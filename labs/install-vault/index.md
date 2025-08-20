@@ -18,10 +18,19 @@ Extract Vault
 tar -xf vault_1.18.1_windows_amd64.zip
 ```
 
-Move the binary into the `$PATH`   
-<!-- sudo cp vault /usr/local/bin/ -->
+Move the binary to C:\tools and add to PATH:
 ```
-move vault.exe %USERPROFILE%\AppData\Local\Microsoft\WindowsApps\
+mkdir C:\tools
+move vault.exe C:\tools\
+```
+
+Add C:\tools to your PATH:
+1. Open System Properties (Win + R, type `sysdm.cpl`)
+2. Click "Environment Variables"
+3. Under "User variables", find "Path" and click "Edit"
+4. Click "New" and add: `C:\tools`
+5. Click "OK" on all dialogs
+6. Close and reopen PowerShell
 ```
 
 Confirm Vault is installed correctly.   
