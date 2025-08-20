@@ -40,4 +40,8 @@ Lab 11: [Drift Prevention and Debugging](labs/tf-drift-prevention-debugging/inde
 Lab 12: [HCP Terraform Workspace health and Drift Detection](labs/hcp-terraform-health-assessments/index.md)
 
 ### Day 3
-Lab 8: [Install Vault](labs/install-vault/index.md)
+Lab 13: [Install Vault](labs/install-vault/index.md)
+
+Lab 14: [Vault Secrets](labs/vault-secrets/index.md)
+
+Lab 15: [Vault Policies](labs/vault-policies/index.md)
