@@ -40,8 +40,10 @@ Now that Vault is installed let's start up the server and play around
 
 Start vault in `dev` mode. 
 ```
-vault server -dev -dev-listen-address=0.0.0.0:8200
+vault server -dev -dev-listen-address='0.0.0.0:8200'
 ```
+
+**Note**: You may see a Windows Security message asking to allow access to public and private networks. Select "Allow" to proceed.
 
 The server will start and print out a bunch of information. 
 
