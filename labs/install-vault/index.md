@@ -172,6 +172,9 @@ vault kv get -field=excited secret/hello
 
 Optional JSON output is very useful for scripts. For example, you can use the `jq` tool to extract the value of the `excited` secret.
 
+### Open PowerShell as Administrator to run Chocolatey
+
+In a new Admin PowerShell run the following:
 
 Install `jq`
 ```
@@ -180,6 +183,9 @@ choco install jq
 
 **Note**: If you don't have Chocolatey installed, you can install it from https://chocolatey.org/install
 
+### Restart VS Code 
+
+After installing `jq`, restart Visual Studio Code to update the PATH so you can use it.
 
 Pipe `vault kv get` output into `jq` to extract results.   
 ```
