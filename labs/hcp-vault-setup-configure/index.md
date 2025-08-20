@@ -99,7 +99,7 @@ Notice that your current namespace is `admin/`.
 
 ### Step 1: Enable KV Secrets Engine
 
-1. In the Vault UI, navigate to **Secrets** → **Enable new engine**
+1. In the Vault UI, navigate to **Secrets Engines** → **Enable new engine**
 2. Select **KV** (Key-Value) from the list
 3. Configure the KV engine:
    - **Path**: `kv-{your-initials}` (e.g., `kv-js`)
