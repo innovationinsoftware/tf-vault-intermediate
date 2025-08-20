@@ -121,7 +121,7 @@ Notice that your current namespace is `admin/`.
    - **Value**: Your AWS secret key
 6. Click **Save**
 
-## Part 7: Integration with HCP Terraform
+## Part 5: Integration with HCP Terraform
 
 ### Step 1: Get Vault Cluster URL
 
