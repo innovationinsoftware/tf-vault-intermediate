@@ -75,7 +75,7 @@ Open a new terminal window and SSH into the server.
 In the new terminal set the following environment variables: 
 ```
 $env:VAULT_ADDR='http://0.0.0.0:8200'
-$env:VAULT_TOKEN=<token saved from previous step in lab>
+$env:VAULT_TOKEN='<token saved from previous step in lab>'
 ```
 
 For example if running the vault server produced the following lines as part of it's output:
@@ -177,13 +177,10 @@ Optional JSON output is very useful for scripts. For example, you can use the `j
 
 Install `jq`
 ```
-sudo yum install -y jq
+choco install jq
 ```
-<!--
-sudo apt update 
-sudo apt install -y jq
--->
-Note: or use 'apt' on apt-based systems such as ubuntu
+
+**Note**: If you don't have Chocolatey installed, you can install it from https://chocolatey.org/install
 
 
 Pipe `vault kv get` output into `jq` to extract results.   
