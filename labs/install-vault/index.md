@@ -9,27 +9,19 @@ Download Vault binary
 <!-- wget https://releases.hashicorp.com/vault/1.10.2/vault_1.10.2_linux_amd64.zip -->
 
 ```
-wget https://releases.hashicorp.com/vault/1.18.1/vault_1.18.1_linux_amd64.zip
+curl -o vault_1.18.1_windows_amd64.zip https://releases.hashicorp.com/vault/1.18.1/vault_1.18.1_windows_amd64.zip
 ```
-
-Install `unzip`
-<!-- ``` sudo apt install -y unzip ``` or on yum systems: -->
-
-```
-sudo yum install -y unzip
-```
-Note: or use 'apt' on apt-based systems such as ubuntu
 
 Extract Vault   
 <!-- unzip vault_1.10.2_linux_amd64.zip -->
 ```
-unzip vault_1.18.1_linux_amd64.zip
+tar -xf vault_1.18.1_windows_amd64.zip
 ```
 
 Move the binary into the `$PATH`   
 <!-- sudo cp vault /usr/local/bin/ -->
 ```
-sudo mv vault ~/.local/bin/
+move vault.exe %USERPROFILE%\AppData\Local\Microsoft\WindowsApps\
 ```
 
 Confirm Vault is installed correctly.   
@@ -39,7 +31,7 @@ vault version
 
 Remove the vault.zip file
 ```
-rm vault_1.18.1_linux_amd64.zip 
+del vault_1.18.1_windows_amd64.zip 
 ```
 
 ## Start Vault server
