@@ -31,8 +31,15 @@ An admin user must be able to:
 * Manage the Key-Value secrets engine enabled at `secret/` path
 
 Define the admin policy in the file named `admin-policy.hcl`.
+Create a new file named `admin-policy.hcl` in your current directory:
+
+```powershell
+New-Item -Path "admin-policy.hcl" -ItemType File
 ```
-tee admin-policy.hcl <<EOF
+
+Then add the following content to the file:
+
+```hcl
 # Read system health check
 path "sys/health"
 {
@@ -92,8 +99,6 @@ path "sys/mounts"
 {
   capabilities = ["read"]
 }
-EOF
-
 ```
 A policy define one or more paths and a list of permitted capabilities. Most of these capabilities map to the HTTP verbs supported by the Vault API.
 
@@ -115,7 +120,7 @@ Create an *admin* policy
 Create a policy named `admin` with the policy defined in `admin-policy.hcl`.
 
 ```
-vault policy write admin /home/vault/admin-policy.hcl
+vault policy write admin ./admin-policy.hcl
 ```
 The policy is created or updated; if it already exists.
 
@@ -137,7 +142,7 @@ A token is able to display its capabilities for a path. This provides a way to v
 
 Create a token with the `admin` policy attached and store the token in the variable `ADMIN_TOKEN`.
 ```
-ADMIN_TOKEN=$(vault token create -format=json -policy="admin" | jq -r ".auth.client_token")
+$ADMIN_TOKEN = (vault token create -format=json -policy="admin" | jq -r ".auth.client_token")
 ```
 
 Display the `ADMIN_TOKEN`.
@@ -153,10 +158,10 @@ Retrieve the capabilities of this token for the `sys/auth/approle` path.
 ```
 vault token capabilities $ADMIN_TOKEN sys/auth/approle
 
-create, delete, read, sudo, update
+create, delete, sudo, update
 ```
 
-The output displays that this token has create, delete, read, sudo, update capabilities for this path.
+The output displays that this token has create, delete, sudo, update capabilities for this path.
 
 Retrieve the capabilities of this token for a path `not` defined in the policy.
 
