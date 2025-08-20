@@ -31,8 +31,7 @@ To understand how the versioning works, let's write some test data.
 
 Create a secret at the path `secret/customer/acme` with a `name` and `contact_email`.
 ```
-vault kv put secret/customer/acme name="ACME Inc." \
-        contact_email="jsmith@acme.com"
+vault kv put secret/customer/acme name="ACME Inc." contact_email="jsmith@acme.com"
 
 Key              Value
 ---              -----
@@ -176,8 +175,7 @@ The secret can also define the maximum number of versions.
 Create four more secrets at the path `secret/customer/acme`.
 
 ```
-vault kv put secret/customer/acme name="ACME Inc." \
-        contact_email="admin@acme.com"
+vault kv put secret/customer/acme name="ACME Inc." contact_email="admin@acme.com"
 ```
 
 Get the metadata of the secret defined at the path `secret/customer/acme`.
@@ -417,8 +415,7 @@ version          1
 
 Overwrite the secret at the path `secret/partner`.
 ```
-vault kv put -cas=1 secret/partner name="Example Co." \
-      partner_id="ABCDEFGHIJKLMN"
+vault kv put -cas=1 secret/partner name="Example Co." partner_id="ABCDEFGHIJKLMN"
 Key              Value
 ---              -----
 created_time     2018-04-16T23:00:28.66552289Z
