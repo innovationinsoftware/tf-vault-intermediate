@@ -21,7 +21,7 @@ tar -xf vault_1.18.1_windows_amd64.zip
 Move the binary into the `$PATH`   
 <!-- sudo cp vault /usr/local/bin/ -->
 ```
-move vault.exe %USERPROFILE%\AppData\Local\Microsoft\WindowsApps\
+move vault.exe $home\AppData\Local\Microsoft\WindowsApps\
 ```
 
 Confirm Vault is installed correctly.   
