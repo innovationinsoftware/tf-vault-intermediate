@@ -45,3 +45,5 @@ Lab 13: [Install Vault](labs/install-vault/index.md)
 Lab 14: [Vault Secrets](labs/vault-secrets/index.md)
 
 Lab 15: [Vault Policies](labs/vault-policies/index.md)
+
+Lab 15: [HCP Terraform & Vault Integration](labs/hcp-vault-setup-configure/index.md)
