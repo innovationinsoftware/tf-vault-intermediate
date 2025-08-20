@@ -70,8 +70,6 @@ Copy the `Unseal Key` and `Root Token`, and save them for future labs.
 
 Open a new terminal window and SSH into the server. 
 
-**Note:** If working in the ```AWS CloudShell``` environment, you can create a new terminal by typing &lt;ctrl-b&gt; then 'c'
-
 In the new terminal set the following environment variables: 
 ```
 $env:VAULT_ADDR='http://0.0.0.0:8200'
@@ -84,7 +82,7 @@ For example if running the vault server produced the following lines as part of 
     Root Token: just-an-example
 ```
 
-You would set variables as follows (**but replace with your root token**):
+Set the variables below (**but replace with your root token**):
 
 ```
     export VAULT_ADDR='http://0.0.0.0:8200'
